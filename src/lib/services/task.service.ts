@@ -2,6 +2,7 @@ import { SORT_ORDER_STEP } from "@/lib/consts";
 import type { Bit, Repeat, Task } from "@/lib/types";
 import { newId } from "@/lib/utils";
 import { db } from "./db.service";
+import { spawnNextOccurrence } from "./repeat.service";
 
 interface CreateTaskInput {
   title: string;
@@ -110,7 +111,11 @@ export async function setTaskCompleted(
     completedAt: completed ? now : undefined,
     updatedAt: now,
   });
-  return (await db.tasks.get(id)) ?? null;
+  const updated = (await db.tasks.get(id)) ?? null;
+  if (completed && task.repeat && task.dueDate) {
+    await spawnNextOccurrence(task);
+  }
+  return updated;
 }
 
 export async function deleteTask(id: string): Promise<void> {

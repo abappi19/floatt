@@ -1,6 +1,7 @@
 # Phase 3 — Query + Hook Layer
 
-**Status:** pending
+**Status:** done
+**Completed:** 2026-04-20
 
 ## Goal
 

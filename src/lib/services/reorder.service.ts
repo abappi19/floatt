@@ -43,3 +43,17 @@ export async function reorderSubtasks(orderedIds: string[]): Promise<void> {
     }
   });
 }
+
+export async function moveSubgroupToGroup(
+  subgroupId: string,
+  targetGroupId: string | null,
+  orderedIdsInTarget: string[],
+): Promise<void> {
+  await db.transaction("rw", db.subgroups, async () => {
+    await db.subgroups.update(subgroupId, { groupId: targetGroupId });
+    const updates = rebalance(orderedIdsInTarget);
+    for (const { id, sortOrder } of updates) {
+      await db.subgroups.update(id, { sortOrder });
+    }
+  });
+}

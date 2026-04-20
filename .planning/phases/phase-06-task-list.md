@@ -1,6 +1,6 @@
 # Phase 6 — Task List
 
-**Status:** pending
+**Status:** done
 
 ## Goal
 

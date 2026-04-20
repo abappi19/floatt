@@ -10,7 +10,13 @@ export {
   reorderSubgroups,
   reorderTasks,
   reorderSubtasks,
+  moveSubgroupToGroup,
 } from "./reorder.service";
 export { buildSearchIndex, searchTasks } from "./search.service";
 export type { SearchableTask } from "./search.service";
-export { scheduleReminder, cancelReminder } from "./reminder.service";
+export {
+  schedule as scheduleReminder,
+  cancelReminder,
+  scheduleAll as scheduleAllReminders,
+  rescheduleAll as rescheduleAllReminders,
+} from "./reminder.service";

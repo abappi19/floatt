@@ -1,6 +1,7 @@
 # Phase 4 — UI Primitives
 
-**Status:** pending
+**Status:** done
+**Completed:** 2026-04-20
 
 ## Goal
 

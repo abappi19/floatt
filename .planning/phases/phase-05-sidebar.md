@@ -1,6 +1,7 @@
 # Phase 5 — Sidebar
 
-**Status:** pending
+**Status:** done
+**Completed:** 2026-04-20
 
 ## Goal
 
