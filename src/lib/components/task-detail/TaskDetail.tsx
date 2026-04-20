@@ -30,7 +30,10 @@ export function TaskDetail() {
       {!selectedId || !task ? (
         <EmptyState />
       ) : (
-        <>
+        <div
+          key={task.id}
+          className="flex flex-1 flex-col animate-in fade-in-0 slide-in-from-right-4 duration-200"
+        >
           <ScrollArea className="flex-1">
             <div className="flex flex-col gap-4 p-3">
               <TaskDetailHeader task={task} />
@@ -56,7 +59,7 @@ export function TaskDetail() {
           <footer className="border-t px-4 py-2 text-[11px] text-muted-foreground">
             Created {relativeDue(task.createdAt)}
           </footer>
-        </>
+        </div>
       )}
     </aside>
   );

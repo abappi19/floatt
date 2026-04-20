@@ -1,6 +1,6 @@
 # Phase 13 — Polish
 
-**Status:** pending
+**Status:** done
 
 ## Goal
 

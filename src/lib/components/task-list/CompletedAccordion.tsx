@@ -31,7 +31,7 @@ export function CompletedAccordion({ tasks }: CompletedAccordionProps) {
       >
         <ChevronDown
           className={cn(
-            "size-4 transition-transform",
+            "size-4 transition-transform duration-200",
             !isOpen && "-rotate-90",
           )}
         />
@@ -39,15 +39,22 @@ export function CompletedAccordion({ tasks }: CompletedAccordionProps) {
         <span className="tabular-nums">{tasks.length}</span>
       </button>
 
-      {isOpen ? (
-        <ul className="flex flex-col gap-1.5">
-          {sorted.map((t) => (
-            <li key={t.id}>
-              <TaskRow task={t} />
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows] duration-200 ease-out",
+          isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+        )}
+      >
+        <div className="overflow-hidden">
+          <ul className="flex flex-col gap-1.5 pb-1">
+            {sorted.map((t) => (
+              <li key={t.id}>
+                <TaskRow task={t} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }

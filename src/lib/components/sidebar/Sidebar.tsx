@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useCommandStore } from "@/lib/stores";
 import { Plus, FolderPlus } from "lucide-react";
 import {
   DndContext,
@@ -59,6 +60,12 @@ export function Sidebar() {
   const subgroups = useSubgroups();
   const [newListOpen, setNewListOpen] = useState(false);
   const [newGroupOpen, setNewGroupOpen] = useState(false);
+
+  const openNewListNonce = useCommandStore((s) => s.openNewListNonce);
+  useEffect(() => {
+    if (openNewListNonce === 0) return;
+    setNewListOpen(true);
+  }, [openNewListNonce]);
   const [dragKind, setDragKind] = useState<DragKind>(null);
 
   const standaloneSubgroups = useMemo(
@@ -206,6 +213,12 @@ export function Sidebar() {
                 ) : null}
                 <RootDropZone active={dragKind === "subgroup"} />
               </SortableContext>
+
+              {groups.length === 0 && standaloneSubgroups.length === 0 ? (
+                <p className="px-3 py-2 text-xs text-muted-foreground/80">
+                  Create a list to organize your tasks.
+                </p>
+              ) : null}
             </div>
           </div>
         </DndContext>

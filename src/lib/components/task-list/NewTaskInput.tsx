@@ -10,6 +10,7 @@ import {
   toggleTaskImportant,
 } from "@/lib/services";
 import { useSubgroups } from "@/lib/hooks";
+import { useCommandStore } from "@/lib/stores";
 
 interface NewTaskInputProps {
   selection: ListSelection;
@@ -42,6 +43,12 @@ export function NewTaskInput({ selection }: NewTaskInputProps) {
   useEffect(() => {
     setTitle("");
   }, [selection.kind, selection.kind === "smart" ? selection.id : selection.id]);
+
+  const focusNonce = useCommandStore((s) => s.focusQuickAddNonce);
+  useEffect(() => {
+    if (focusNonce === 0) return;
+    inputRef.current?.focus();
+  }, [focusNonce]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

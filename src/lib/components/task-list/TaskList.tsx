@@ -27,6 +27,7 @@ import type { TaskSort } from "@/lib/stores/ui.store";
 import type { PlannedBuckets } from "@/lib/queries";
 import { CompletedAccordion } from "./CompletedAccordion";
 import { EmptyState } from "./EmptyState";
+import { MyDaySuggestions } from "./MyDaySuggestions";
 import { NewTaskInput } from "./NewTaskInput";
 import { TaskRow } from "./TaskRow";
 import { SortableTaskList } from "./SortableTaskList";
@@ -304,7 +305,10 @@ export function TaskList() {
       </header>
 
       <ScrollArea className="flex-1">
-        <div className="flex min-h-full flex-col px-3 py-3">
+        <div className="flex min-h-full flex-col gap-3 px-3 py-3">
+          {selection.kind === "smart" && selection.id === "my-day" ? (
+            <MyDaySuggestions />
+          ) : null}
           <ListBodyDispatcher selection={selection} sort={sort} />
         </div>
       </ScrollArea>

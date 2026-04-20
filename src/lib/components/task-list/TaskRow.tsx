@@ -60,9 +60,12 @@ export function TaskRow({ task }: TaskRowProps) {
       tabIndex={0}
       onClick={() => selectTask(task.id)}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
+        if (e.key === "Enter") {
           e.preventDefault();
           selectTask(task.id);
+        } else if (e.key === " " || e.code === "Space") {
+          e.preventDefault();
+          void setTaskCompleted(task.id, !isCompleted);
         }
       }}
       className={cn(
