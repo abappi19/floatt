@@ -165,7 +165,7 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="flex h-full w-72 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground">
+    <aside className="flex h-full w-full flex-col border-r bg-sidebar text-sidebar-foreground">
       <div className="flex h-12 items-center gap-2 border-b px-4">
         <span className="font-semibold">{APP_NAME}</span>
       </div>

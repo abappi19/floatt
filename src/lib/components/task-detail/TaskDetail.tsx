@@ -22,7 +22,7 @@ export function TaskDetail() {
   const task = useTask(selectedId);
 
   return (
-    <aside className="flex w-80 flex-col border-l bg-muted/20">
+    <aside className="flex h-full w-full flex-col border-l bg-muted/20">
       <div className="flex h-12 items-center border-b px-4">
         <span className="font-semibold">Details</span>
       </div>
