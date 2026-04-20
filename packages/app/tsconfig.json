@@ -1,0 +1,10 @@
+{
+  "extends": "@floatt/config/tsconfig/react.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@floatt/app/*": ["./src/*"]
+    }
+  },
+  "include": ["src"]
+}

@@ -1,0 +1,4 @@
+{
+  "extends": "@floatt/config/tsconfig/react.json",
+  "include": []
+}

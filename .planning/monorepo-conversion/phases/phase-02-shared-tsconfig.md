@@ -1,6 +1,6 @@
 # Phase 2 — Shared tsconfig
 
-**Status:** planned
+**Status:** done
 
 ## Goal
 

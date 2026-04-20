@@ -1,5 +1,8 @@
 {
   "name": "@floatt/desktop",
   "private": true,
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "devDependencies": {
+    "@floatt/config": "workspace:*"
+  }
 }

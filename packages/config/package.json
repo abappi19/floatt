@@ -1,5 +1,10 @@
 {
   "name": "@floatt/config",
   "private": true,
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "files": ["tsconfig"],
+  "exports": {
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/react.json": "./tsconfig/react.json"
+  }
 }
