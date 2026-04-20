@@ -15,10 +15,12 @@ import {
 import { VisuallyHidden } from "radix-ui";
 import {
   useMediaQuery,
+  useResizableSheetWidth,
   useSearchQuery,
   useSelectedTaskId,
   useSelectTask,
 } from "@/lib/hooks";
+import { cn } from "@/lib/utils/cn";
 
 export function TodoScreen() {
   const query = useSearchQuery();
@@ -28,6 +30,7 @@ export function TodoScreen() {
   const selectTask = useSelectTask();
 
   const detailOpen = isNarrow && selectedTaskId !== null;
+  const { width: sheetWidth, dragging, onPointerDown } = useResizableSheetWidth();
 
   return (
     <div className="h-screen w-screen bg-background text-foreground">
@@ -69,12 +72,27 @@ export function TodoScreen() {
       >
         <SheetContent
           side="right"
-          className="w-full p-0 sm:max-w-md"
+          className={cn(
+            "p-0 max-w-[90vw] sm:max-w-[90vw]",
+            dragging && "transition-none",
+          )}
+          style={{ width: sheetWidth }}
           showCloseButton={false}
         >
           <VisuallyHidden.Root>
             <SheetTitle>Task details</SheetTitle>
           </VisuallyHidden.Root>
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            onPointerDown={onPointerDown}
+            className={cn(
+              "absolute inset-y-0 left-0 z-10 w-1.5 -translate-x-1/2 cursor-col-resize touch-none",
+              "after:absolute after:inset-y-0 after:left-1/2 after:w-px after:-translate-x-1/2 after:bg-border",
+              "hover:after:bg-primary/40",
+              dragging && "after:bg-primary/60",
+            )}
+          />
           <TaskDetail />
         </SheetContent>
       </Sheet>
