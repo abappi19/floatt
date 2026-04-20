@@ -7,7 +7,7 @@ import {
 } from "@tauri-apps/plugin-notification";
 import { openUrl as tauriOpenUrl } from "@tauri-apps/plugin-opener";
 import type { PermissionState, Platform } from "@floatt/app/platform";
-import { hashToInt32 } from "@/lib/utils/hash";
+import { hashToInt32 } from "@floatt/app/utils";
 
 function normalizePermission(value: string): PermissionState {
   if (value === "granted") return "granted";

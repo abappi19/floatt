@@ -1,6 +1,6 @@
 # Phase 6 — Build the Desktop App
 
-**Status:** planned
+**Status:** done
 
 ## Goal
 
