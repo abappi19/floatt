@@ -23,7 +23,10 @@
     /* Paths */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@floatt/app": ["packages/app/src/index.ts"],
+      "@floatt/app/platform": ["packages/app/src/platform/index.ts"],
+      "@floatt/app/providers": ["packages/app/src/providers/index.ts"]
     }
   },
   "include": ["src"],

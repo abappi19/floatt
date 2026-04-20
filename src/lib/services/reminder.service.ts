@@ -1,32 +1,24 @@
-import {
-  cancel as tauriCancel,
-  isPermissionGranted,
-  Schedule,
-  sendNotification,
-} from "@tauri-apps/plugin-notification";
+import type { PlatformNotifications } from "@floatt/app/platform";
 import { getTasksWithReminders } from "@/lib/queries";
 import { toast } from "@/lib/stores/toast.store";
 import type { Task } from "@/lib/types";
-import { hashToInt32 } from "@/lib/utils/hash";
 
 type Mode = "native" | "fallback" | "disabled";
 
 const timers = new Map<string, ReturnType<typeof setTimeout>>();
-const scheduledNativeIds = new Map<string, number>();
+const scheduledNativeIds = new Set<string>();
 let activeMode: Mode = "disabled";
-
-function notificationIdFor(taskId: string): number {
-  return hashToInt32(taskId);
-}
 
 function isFuture(iso: string): boolean {
   return new Date(iso).getTime() > Date.now();
 }
 
-async function detectMode(): Promise<Mode> {
+async function detectMode(
+  notifications: PlatformNotifications,
+): Promise<Mode> {
   try {
-    const granted = await isPermissionGranted();
-    return granted ? "native" : "fallback";
+    const available = await notifications.isAvailable();
+    return available ? "native" : "fallback";
   } catch {
     return "fallback";
   }
@@ -51,65 +43,81 @@ function scheduleFallback(task: Task): void {
   timers.set(task.id, handle);
 }
 
-function scheduleNative(task: Task): void {
+async function scheduleNative(
+  notifications: PlatformNotifications,
+  task: Task,
+): Promise<void> {
   if (!task.reminderAt || !isFuture(task.reminderAt)) return;
-  const id = notificationIdFor(task.id);
   try {
-    sendNotification({
-      id,
+    await notifications.schedule({
+      id: task.id,
       title: "Reminder",
       body: task.title,
-      schedule: Schedule.at(new Date(task.reminderAt), false, true),
+      at: new Date(task.reminderAt),
     });
-    scheduledNativeIds.set(task.id, id);
+    scheduledNativeIds.add(task.id);
   } catch {
     scheduleFallback(task);
   }
 }
 
-async function cancelNative(taskId: string): Promise<void> {
-  const id = scheduledNativeIds.get(taskId) ?? notificationIdFor(taskId);
+async function cancelNative(
+  notifications: PlatformNotifications,
+  taskId: string,
+): Promise<void> {
   try {
-    await tauriCancel([id]);
+    await notifications.cancel(taskId);
   } catch {
   }
   scheduledNativeIds.delete(taskId);
 }
 
-async function clearAll(): Promise<void> {
+async function clearAll(notifications: PlatformNotifications): Promise<void> {
   for (const taskId of timers.keys()) clearFallbackTimer(taskId);
   if (scheduledNativeIds.size > 0) {
-    const ids = Array.from(scheduledNativeIds.values());
-    try {
-      await tauriCancel(ids);
-    } catch {
+    const ids = Array.from(scheduledNativeIds);
+    for (const id of ids) {
+      try {
+        await notifications.cancel(id);
+      } catch {
+      }
     }
     scheduledNativeIds.clear();
   }
 }
 
-export async function scheduleAll(): Promise<void> {
-  activeMode = await detectMode();
+export async function scheduleAll(
+  notifications: PlatformNotifications,
+): Promise<void> {
+  activeMode = await detectMode(notifications);
   if (activeMode === "disabled") return;
   const tasks = await getTasksWithReminders();
   for (const task of tasks) {
-    if (activeMode === "native") scheduleNative(task);
+    if (activeMode === "native") await scheduleNative(notifications, task);
     else scheduleFallback(task);
   }
 }
 
-export async function schedule(task: Task): Promise<void> {
-  if (activeMode === "disabled") activeMode = await detectMode();
-  if (activeMode === "native") scheduleNative(task);
+export async function schedule(
+  notifications: PlatformNotifications,
+  task: Task,
+): Promise<void> {
+  if (activeMode === "disabled") activeMode = await detectMode(notifications);
+  if (activeMode === "native") await scheduleNative(notifications, task);
   else scheduleFallback(task);
 }
 
-export async function cancelReminder(taskId: string): Promise<void> {
+export async function cancelReminder(
+  notifications: PlatformNotifications,
+  taskId: string,
+): Promise<void> {
   clearFallbackTimer(taskId);
-  await cancelNative(taskId);
+  await cancelNative(notifications, taskId);
 }
 
-export async function rescheduleAll(): Promise<void> {
-  await clearAll();
-  await scheduleAll();
+export async function rescheduleAll(
+  notifications: PlatformNotifications,
+): Promise<void> {
+  await clearAll(notifications);
+  await scheduleAll(notifications);
 }

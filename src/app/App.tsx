@@ -1,3 +1,5 @@
+import { PlatformProvider } from "@floatt/app/providers";
+import { desktopPlatform } from "@/platform/platform.desktop";
 import { ThemeProvider } from "@/app/providers/ThemeProvider";
 import { NotificationProvider } from "@/app/providers/NotificationProvider";
 import { TodoScreen } from "@/lib/screens/TodoScreen";
@@ -45,10 +47,12 @@ function AppShell() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <NotificationProvider>
-        <AppShell />
-      </NotificationProvider>
-    </ThemeProvider>
+    <PlatformProvider platform={desktopPlatform}>
+      <ThemeProvider>
+        <NotificationProvider>
+          <AppShell />
+        </NotificationProvider>
+      </ThemeProvider>
+    </PlatformProvider>
   );
 }

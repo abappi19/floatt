@@ -96,7 +96,7 @@ floatt/
 | -- | ----- | ------ |
 | 1  | [Workspace scaffolding](phases/phase-01-workspace-scaffolding.md) | done |
 | 2  | [Shared tsconfig](phases/phase-02-shared-tsconfig.md) | done |
-| 3  | [Platform adapter](phases/phase-03-platform-adapter.md) | planned |
+| 3  | [Platform adapter](phases/phase-03-platform-adapter.md) | done |
 | 4  | [Move shared code](phases/phase-04-move-shared-code.md) | planned |
 | 5  | [Build web app](phases/phase-05-build-web-app.md) | planned |
 | 6  | [Build desktop app](phases/phase-06-build-desktop-app.md) | planned |

@@ -1,6 +1,6 @@
 # Phase 3 — Platform Adapter
 
-**Status:** planned
+**Status:** done
 
 ## Goal
 

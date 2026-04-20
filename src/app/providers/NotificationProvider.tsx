@@ -5,10 +5,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import {
-  isPermissionGranted,
-  requestPermission,
-} from "@tauri-apps/plugin-notification";
+import { usePlatform } from "@floatt/app/providers";
+import type { PlatformNotifications } from "@floatt/app/platform";
 
 type NotificationPermission = "granted" | "denied" | "unknown";
 
@@ -21,11 +19,13 @@ const NotificationContext = createContext<NotificationContextValue | null>(
   null,
 );
 
-async function resolvePermission(): Promise<NotificationPermission> {
+async function resolvePermission(
+  notifications: PlatformNotifications,
+): Promise<NotificationPermission> {
   try {
-    const granted = await isPermissionGranted();
-    if (granted) return "granted";
-    const result = await requestPermission();
+    const available = await notifications.isAvailable();
+    if (available) return "granted";
+    const result = await notifications.requestPermission();
     return result === "granted" ? "granted" : "denied";
   } catch {
     return "unknown";
@@ -33,23 +33,24 @@ async function resolvePermission(): Promise<NotificationPermission> {
 }
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
+  const { notifications } = usePlatform();
   const [permission, setPermission] =
     useState<NotificationPermission>("unknown");
 
   useEffect(() => {
     let cancelled = false;
-    resolvePermission().then((result) => {
+    resolvePermission(notifications).then((result) => {
       if (!cancelled) setPermission(result);
     });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [notifications]);
 
   const value: NotificationContextValue = {
     permission,
     request: async () => {
-      const result = await resolvePermission();
+      const result = await resolvePermission(notifications);
       setPermission(result);
       return result;
     },

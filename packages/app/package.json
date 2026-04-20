@@ -2,8 +2,19 @@
   "name": "@floatt/app",
   "private": true,
   "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./platform": "./src/platform/index.ts",
+    "./providers": "./src/providers/index.ts"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
   "devDependencies": {
     "@floatt/config": "workspace:*",
+    "@types/react": "^19.1.8",
+    "react": "^19.1.0",
     "typescript": "^5.7.3"
   }
 }
