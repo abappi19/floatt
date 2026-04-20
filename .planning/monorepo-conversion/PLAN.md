@@ -94,7 +94,7 @@ floatt/
 
 | #  | Phase | Status |
 | -- | ----- | ------ |
-| 1  | [Workspace scaffolding](phases/phase-01-workspace-scaffolding.md) | planned |
+| 1  | [Workspace scaffolding](phases/phase-01-workspace-scaffolding.md) | done |
 | 2  | [Shared tsconfig](phases/phase-02-shared-tsconfig.md) | planned |
 | 3  | [Platform adapter](phases/phase-03-platform-adapter.md) | planned |
 | 4  | [Move shared code](phases/phase-04-move-shared-code.md) | planned |

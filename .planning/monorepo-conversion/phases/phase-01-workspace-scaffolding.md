@@ -1,6 +1,6 @@
 # Phase 1 — Workspace Scaffolding
 
-**Status:** planned
+**Status:** done
 
 ## Goal
 

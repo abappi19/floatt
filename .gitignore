@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Monorepo
+.turbo/
+apps/*/dist/
+apps/*/node_modules/
+packages/*/node_modules/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
