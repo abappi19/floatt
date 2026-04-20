@@ -1,6 +1,6 @@
 # Phase 4 — Move Shared Code into `packages/app`
 
-**Status:** planned
+**Status:** done
 
 ## Goal
 
