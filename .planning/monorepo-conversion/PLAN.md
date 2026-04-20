@@ -100,7 +100,7 @@ floatt/
 | 4  | [Move shared code](phases/phase-04-move-shared-code.md) | done |
 | 5  | [Build web app](phases/phase-05-build-web-app.md) | done |
 | 6  | [Build desktop app](phases/phase-06-build-desktop-app.md) | done |
-| 7  | [Turbo pipeline](phases/phase-07-turbo-pipeline.md) | planned |
+| 7  | [Turbo pipeline](phases/phase-07-turbo-pipeline.md) | done |
 | 8  | [Vercel config](phases/phase-08-vercel-config.md) | planned |
 | 9  | [GitHub Actions for Tauri](phases/phase-09-github-actions-tauri.md) | planned |
 | 10 | [Verification](phases/phase-10-verification.md) | planned |
