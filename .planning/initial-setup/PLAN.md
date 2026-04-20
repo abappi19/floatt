@@ -1,6 +1,6 @@
-# Floatt — Microsoft Todo Clone
+# Floatt — Microsoft Todo Clone (Initial Build)
 
-Local-first desktop app, full feature parity with MS Todo's consumer surface.
+Local-first desktop app, full feature parity with MS Todo's consumer surface. This plan covers the original 13-phase build-out of the Tauri + React + Dexie app — completed 2026-04-20.
 
 ---
 
@@ -192,21 +192,21 @@ No ESLint rule yet — relying on discipline. If it slips, add `eslint-plugin-bo
 
 ## Phase Index
 
-| #  | Phase                                      | Status      |
-| -- | ------------------------------------------ | ----------- |
-| 1  | [Foundation](phases/phase-01-foundation.md) | done        |
-| 2  | [Data layer](phases/phase-02-data-layer.md) | done        |
-| 3  | [Query + hook layer](phases/phase-03-query-hook-layer.md) | done    |
-| 4  | [UI primitives](phases/phase-04-ui-primitives.md) | done    |
-| 5  | [Sidebar](phases/phase-05-sidebar.md)      | done        |
-| 6  | [Task list](phases/phase-06-task-list.md)  | done        |
-| 7  | [Task detail](phases/phase-07-task-detail.md) | done     |
+| #  | Phase                                      | Status |
+| -- | ------------------------------------------ | ------ |
+| 1  | [Foundation](phases/phase-01-foundation.md) | done   |
+| 2  | [Data layer](phases/phase-02-data-layer.md) | done   |
+| 3  | [Query + hook layer](phases/phase-03-query-hook-layer.md) | done |
+| 4  | [UI primitives](phases/phase-04-ui-primitives.md) | done |
+| 5  | [Sidebar](phases/phase-05-sidebar.md)      | done   |
+| 6  | [Task list](phases/phase-06-task-list.md)  | done   |
+| 7  | [Task detail](phases/phase-07-task-detail.md) | done |
 | 8  | [Reminders runtime](phases/phase-08-reminders-runtime.md) | done |
 | 9  | [Repeat runtime](phases/phase-09-repeat-runtime.md) | done |
 | 10 | [My Day runtime](phases/phase-10-my-day-runtime.md) | done |
-| 11 | [Drag-to-reorder](phases/phase-11-drag-reorder.md) | done        |
-| 12 | [Search](phases/phase-12-search.md)        | done        |
-| 13 | [Polish](phases/phase-13-polish.md)        | done        |
+| 11 | [Drag-to-reorder](phases/phase-11-drag-reorder.md) | done |
+| 12 | [Search](phases/phase-12-search.md)        | done   |
+| 13 | [Polish](phases/phase-13-polish.md)        | done   |
 
 ---
 
