@@ -1,4 +1,10 @@
 {
   "extends": "@floatt/config/tsconfig/react.json",
-  "include": []
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../../packages/app/src/*"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
 }
