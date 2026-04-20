@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ListTodo } from "lucide-react";
+import { useSortable } from "@dnd-kit/sortable";
 import type { Group, Subgroup } from "@/lib/types";
 import { cn } from "@/lib/utils/cn";
 import { useTasks, useSelectList, useSelectedList } from "@/lib/hooks";
@@ -24,6 +25,13 @@ interface SubgroupItemProps {
   indent?: boolean;
 }
 
+function toTransform(
+  t: { x: number; y: number; scaleX: number; scaleY: number } | null,
+): string | undefined {
+  if (!t) return undefined;
+  return `translate3d(${t.x}px, ${t.y}px, 0) scaleX(${t.scaleX}) scaleY(${t.scaleY})`;
+}
+
 export function SubgroupItem({ subgroup, groups, indent }: SubgroupItemProps) {
   const selected = useSelectedList();
   const selectList = useSelectList();
@@ -37,6 +45,19 @@ export function SubgroupItem({ subgroup, groups, indent }: SubgroupItemProps) {
   const [draftName, setDraftName] = useState(subgroup.name);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: subgroup.id,
+    data: { type: "subgroup" },
+    disabled: isRenaming,
+  });
 
   useEffect(() => {
     if (isRenaming) {
@@ -71,9 +92,19 @@ export function SubgroupItem({ subgroup, groups, indent }: SubgroupItemProps) {
     selectList({ kind: "subgroup", id: subgroup.id });
   };
 
+  const style: React.CSSProperties = {
+    transform: toTransform(transform),
+    transition,
+    opacity: isDragging ? 0.6 : undefined,
+  };
+
   return (
     <>
       <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
         className={cn(
           "group relative flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors",
           indent && "pl-7",
@@ -104,6 +135,7 @@ export function SubgroupItem({ subgroup, groups, indent }: SubgroupItemProps) {
                 }
               }}
               onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
               className="flex-1 min-w-0 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none focus-visible:ring-[2px] focus-visible:ring-ring/50"
             />
           ) : (

@@ -1,6 +1,6 @@
 # Phase 11 — Drag-to-Reorder
 
-**Status:** pending
+**Status:** done
 
 ## Goal
 

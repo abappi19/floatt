@@ -204,7 +204,7 @@ No ESLint rule yet — relying on discipline. If it slips, add `eslint-plugin-bo
 | 8  | [Reminders runtime](phases/phase-08-reminders-runtime.md) | done |
 | 9  | [Repeat runtime](phases/phase-09-repeat-runtime.md) | done |
 | 10 | [My Day runtime](phases/phase-10-my-day-runtime.md) | done |
-| 11 | [Drag-to-reorder](phases/phase-11-drag-reorder.md) | partial (tasks + subtasks only; sidebar groups/subgroups deferred) |
+| 11 | [Drag-to-reorder](phases/phase-11-drag-reorder.md) | done        |
 | 12 | [Search](phases/phase-12-search.md)        | done        |
 | 13 | [Polish](phases/phase-13-polish.md)        | pending     |
 

@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronRight, Folder } from "lucide-react";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import type { Group } from "@/lib/types";
 import { cn } from "@/lib/utils/cn";
 import { useSubgroupsByGroup } from "@/lib/hooks";
@@ -21,6 +26,13 @@ interface GroupItemProps {
   allGroups: Group[];
 }
 
+function toTransform(
+  t: { x: number; y: number; scaleX: number; scaleY: number } | null,
+): string | undefined {
+  if (!t) return undefined;
+  return `translate3d(${t.x}px, ${t.y}px, 0) scaleX(${t.scaleX}) scaleY(${t.scaleY})`;
+}
+
 export function GroupItem({ group, allGroups }: GroupItemProps) {
   const subgroups = useSubgroupsByGroup(group.id);
 
@@ -28,6 +40,19 @@ export function GroupItem({ group, allGroups }: GroupItemProps) {
   const [draftName, setDraftName] = useState(group.name);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: group.id,
+    data: { type: "group" },
+    disabled: isRenaming,
+  });
 
   useEffect(() => {
     if (isRenaming) {
@@ -40,6 +65,8 @@ export function GroupItem({ group, allGroups }: GroupItemProps) {
     () => allGroups.filter((g) => g.id !== group.id),
     [allGroups, group.id],
   );
+
+  const subgroupIds = useMemo(() => subgroups.map((s) => s.id), [subgroups]);
 
   const startRename = () => {
     setDraftName(group.name);
@@ -64,9 +91,17 @@ export function GroupItem({ group, allGroups }: GroupItemProps) {
     toggleGroupCollapse(group.id);
   };
 
+  const style: React.CSSProperties = {
+    transform: toTransform(transform),
+    transition,
+    opacity: isDragging ? 0.6 : undefined,
+  };
+
   return (
-    <div className="flex flex-col">
+    <div ref={setNodeRef} style={style} className="flex flex-col">
       <div
+        {...attributes}
+        {...listeners}
         className={cn(
           "group relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent/60",
         )}
@@ -100,6 +135,7 @@ export function GroupItem({ group, allGroups }: GroupItemProps) {
                 }
               }}
               onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
               className="flex-1 min-w-0 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none focus-visible:ring-[2px] focus-visible:ring-ring/50"
             />
           ) : (
@@ -126,13 +162,18 @@ export function GroupItem({ group, allGroups }: GroupItemProps) {
       </div>
 
       {!group.isCollapsed ? (
-        <ul className="flex flex-col gap-0.5">
-          {subgroups.map((s) => (
-            <li key={s.id}>
-              <SubgroupItem subgroup={s} groups={otherGroups} indent />
-            </li>
-          ))}
-        </ul>
+        <SortableContext
+          items={subgroupIds}
+          strategy={verticalListSortingStrategy}
+        >
+          <ul className="flex flex-col gap-0.5">
+            {subgroups.map((s) => (
+              <li key={s.id}>
+                <SubgroupItem subgroup={s} groups={otherGroups} indent />
+              </li>
+            ))}
+          </ul>
+        </SortableContext>
       ) : null}
 
       <ConfirmDestructiveDialog
