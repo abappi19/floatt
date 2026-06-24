@@ -12,9 +12,9 @@ Run from the repo root (pnpm + Turborepo):
 
 ```bash
 pnpm dev            # run all dev servers via turbo
-pnpm dev:web        # web app only (Vite, @floatt/web)
+pnpm dev:web        # web app only (Next.js, @floatt/web)
 pnpm dev:desktop    # desktop app (pnpm --filter @floatt/desktop tauri dev)
-pnpm build          # build everything (tsc --noEmit && vite build per app)
+pnpm build          # build everything (next build → static export to out/ for web; tsc --noEmit && vite build for desktop)
 pnpm test           # vitest run, all packages
 pnpm check-types    # tsc --noEmit across packages
 
@@ -33,7 +33,7 @@ Notes:
 ### Monorepo layout
 
 - `packages/app` (`@floatt/app`) — **all** shared UI, state, and business logic. This is where ~everything lives.
-- `apps/web` (`@floatt/web`) and `apps/desktop` (`@floatt/desktop`) — thin platform shells. Each `main.tsx` does only one job: render `<App />` wrapped in `<PlatformProvider platform={...} />` with a platform-specific adapter.
+- `apps/web` (`@floatt/web`, **Next.js** App Router) and `apps/desktop` (`@floatt/desktop`, **Vite + Tauri**) — thin platform shells. Each does only one job: render `<App />` wrapped in `<PlatformProvider platform={...} />` with a platform-specific adapter. Desktop's entry is `src/main.tsx`; web's is `app/page.tsx` → a client-only `app/FloattApp.tsx` (`dynamic(..., { ssr: false })`, since everything is client-side IndexedDB).
 - `packages/config` (`@floatt/config`) — shared `tsconfig` bases (`base.json`, `react.json`). App tsconfigs `extends` these.
 
 **Implication:** new features and components almost always go in `packages/app/src`, not in the apps. Only touch `apps/*` when wiring platform capabilities.
@@ -69,12 +69,12 @@ Cross-cutting runtime behavior is started by hooks mounted in `App.tsx`'s `AppSh
 
 ### Styling & UI
 
-Tailwind CSS v4 (via `@tailwindcss/vite`, no separate config file — global styles in `packages/app/src/styles/globals.css`). UI primitives in `components/ui/` are shadcn-style wrappers over `radix-ui`, composed with `class-variance-authority` + the `cn()` util (`utils/cn.ts`). Drag-and-drop uses `@dnd-kit`; search uses `fuse.js`; dates use `date-fns`.
+Tailwind CSS v4, no separate config file — global styles in `packages/app/src/styles/globals.css`. Web wires it via `@tailwindcss/postcss` (`apps/web/postcss.config.mjs`); desktop via `@tailwindcss/vite`. UI primitives in `components/ui/` are shadcn-style wrappers over `radix-ui`, composed with `class-variance-authority` + the `cn()` util (`utils/cn.ts`). Drag-and-drop uses `@dnd-kit`; search uses `fuse.js`; dates use `date-fns`.
 
 ### Path aliases
 
-Two aliases resolve to the shared package source and must stay in sync across tsconfig and Vite:
-- `@/*` → `packages/app/src/*` (configured in `packages/app/tsconfig.json` and each app's `vite.config.ts`).
+Two aliases resolve to the shared package source and must stay in sync across configs:
+- `@/*` → `packages/app/src/*` (configured in `packages/app/tsconfig.json`, the desktop `vite.config.ts`, and the web `tsconfig.json` `paths`).
 - `@floatt/app/*` subpath exports (e.g. `@floatt/app/platform`, `@floatt/app/utils`) are declared in `packages/app/package.json` `exports`. Apps consume the package via these; the shared package itself uses `@/*` internally.
 
-Each app's Vite config sets `optimizeDeps.exclude: ["@floatt/app"]` so the workspace source is used directly (not pre-bundled).
+The workspace source is consumed directly (not pre-bundled): desktop's `vite.config.ts` sets `optimizeDeps.exclude: ["@floatt/app"]`; web's `next.config.mjs` sets `transpilePackages: ["@floatt/app"]`.
