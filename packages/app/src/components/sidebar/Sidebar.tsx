@@ -179,7 +179,7 @@ export function Sidebar() {
 
       <SearchBar className="px-2 pt-2" />
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 min-h-0">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
