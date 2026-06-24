@@ -169,10 +169,10 @@ export function Sidebar() {
     <aside className="flex h-full w-full flex-col border-r bg-sidebar text-sidebar-foreground">
       <div
         style={{
-          paddingTop: insets.top || undefined,
-          paddingLeft: insets.left || undefined,
+          paddingTop: Number(insets.top) + 8,
+          paddingLeft: 16,
         }}
-        className="flex min-h-10 items-center gap-2 border-b px-4"
+        className="flex min-h-10 items-center gap-2"
       >
         <span className="font-semibold">{APP_NAME}</span>
       </div>
