@@ -177,9 +177,7 @@ export function Sidebar() {
         <span className="font-semibold">{APP_NAME}</span>
       </div>
 
-      <div className="border-b p-3">
-        <SearchBar />
-      </div>
+      <SearchBar className="px-2 pt-2" />
 
       <ScrollArea className="flex-1">
         <DndContext
@@ -231,7 +229,7 @@ export function Sidebar() {
         </DndContext>
       </ScrollArea>
 
-      <div className="flex items-center gap-1 border-t p-2">
+      <div className="flex items-center gap-1 p-2">
         <Button
           variant="ghost"
           size="sm"

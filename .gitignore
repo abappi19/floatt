@@ -18,6 +18,11 @@ apps/*/dist/
 apps/*/node_modules/
 packages/*/node_modules/
 
+# Next.js
+apps/*/.next/
+apps/*/out/
+next-env.d.ts
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
