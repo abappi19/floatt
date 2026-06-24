@@ -1,4 +1,4 @@
-import { useTask, useSelectedTaskId } from "@/hooks";
+import { useTask, useSelectedTaskId, useWindowInsets } from "@/hooks";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { relativeDue } from "@/utils";
 import { TaskDetailHeader } from "./TaskDetailHeader";
@@ -20,10 +20,14 @@ function EmptyState() {
 export function TaskDetail() {
   const selectedId = useSelectedTaskId();
   const task = useTask(selectedId);
+  const insets = useWindowInsets();
 
   return (
     <aside className="flex h-full w-full flex-col border-l bg-muted/20">
-      <div className="flex h-10 items-center border-b px-4">
+      <div
+        style={{ paddingTop: insets.top || undefined }}
+        className="flex min-h-10 items-center border-b px-4"
+      >
         <span className="font-semibold">Details</span>
       </div>
 

@@ -8,6 +8,7 @@ import {
   useSelectList,
   useSelectTask,
   useSubgroups,
+  useWindowInsets,
 } from "@/hooks";
 import type { Subgroup, Subtask, Task } from "@/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -29,6 +30,7 @@ export function SearchResults() {
   const subgroups = useSubgroups();
   const selectList = useSelectList();
   const selectTask = useSelectTask();
+  const insets = useWindowInsets();
 
   const tasks = useLiveQuery(() => db.tasks.toArray(), [], []);
   const subtasks = useLiveQuery(() => db.subtasks.toArray(), [], []);
@@ -91,7 +93,10 @@ export function SearchResults() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex h-10 items-center gap-3 border-b px-4">
+      <header
+        style={{ paddingTop: insets.top || undefined }}
+        className="flex min-h-10 items-center gap-3 border-b px-4"
+      >
         <span className="font-semibold">Search</span>
         <span className="text-xs text-muted-foreground">
           {taskHits.length + subtaskHits.length} results

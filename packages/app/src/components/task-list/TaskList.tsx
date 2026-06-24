@@ -22,6 +22,7 @@ import {
   useSubgroups,
   useTaskSort,
   useTasks,
+  useWindowInsets,
 } from "@/hooks";
 import type { TaskSort } from "@/stores/ui.store";
 import type { PlannedBuckets } from "@/queries";
@@ -293,10 +294,14 @@ export function TaskList() {
   const selection = useSelectedList();
   const sort = useTaskSort();
   const title = useListTitle(selection);
+  const insets = useWindowInsets();
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex h-10 items-center gap-3 border-b px-4">
+      <header
+        style={{ paddingTop: insets.top || undefined }}
+        className="flex min-h-10 items-center gap-3 border-b px-4"
+      >
         <span className="font-semibold">{title}</span>
         <HeaderCount selection={selection} />
         <div className="ml-auto">

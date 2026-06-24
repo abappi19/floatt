@@ -51,4 +51,11 @@ export const webPlatform: Platform = {
       window.open(url, "_blank", "noopener,noreferrer");
     },
   },
+  window: {
+    controls: "none",
+    insets: { top: 0, left: 0, right: 0 },
+    async minimize() {},
+    async toggleMaximize() {},
+    async close() {},
+  },
 };

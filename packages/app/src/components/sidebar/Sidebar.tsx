@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { APP_NAME } from "@/consts";
-import { useGroups, useSubgroups } from "@/hooks";
+import { useGroups, useSubgroups, useWindowInsets } from "@/hooks";
 import {
   moveSubgroupToGroup,
   reorderGroups,
@@ -58,6 +58,7 @@ function RootDropZone({ active }: { active: boolean }) {
 export function Sidebar() {
   const groups = useGroups();
   const subgroups = useSubgroups();
+  const insets = useWindowInsets();
   const [newListOpen, setNewListOpen] = useState(false);
   const [newGroupOpen, setNewGroupOpen] = useState(false);
 
@@ -166,7 +167,13 @@ export function Sidebar() {
 
   return (
     <aside className="flex h-full w-full flex-col border-r bg-sidebar text-sidebar-foreground">
-      <div className="flex h-10 items-center gap-2 border-b px-4">
+      <div
+        style={{
+          paddingTop: insets.top || undefined,
+          paddingLeft: insets.left || undefined,
+        }}
+        className="flex min-h-10 items-center gap-2 border-b px-4"
+      >
         <span className="font-semibold">{APP_NAME}</span>
       </div>
 

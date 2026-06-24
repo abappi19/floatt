@@ -21,6 +21,8 @@ import {
   useSelectTask,
 } from "@/hooks";
 import { cn } from "@/utils/cn";
+import { DragRegion } from "@/components/chrome/DragRegion";
+import { WindowControls } from "@/components/chrome/WindowControls";
 
 export function TodoScreen() {
   const query = useSearchQuery();
@@ -96,6 +98,9 @@ export function TodoScreen() {
           <TaskDetail />
         </SheetContent>
       </Sheet>
+
+      <DragRegion />
+      <WindowControls />
     </div>
   );
 }

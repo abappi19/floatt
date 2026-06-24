@@ -12,6 +12,7 @@ export { useReminders } from "./useReminders";
 export { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 export { useMediaQuery } from "./useMediaQuery";
 export { useResizableSheetWidth } from "./useResizableSheetWidth";
+export { useWindowInsets, useDragRegion } from "./useWindowChrome";
 export {
   useUiStore,
   useSelectedList,
