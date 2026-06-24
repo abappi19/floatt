@@ -25,7 +25,7 @@ export function SearchBar() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search"
-        className="h-8 pl-8 pr-8"
+        className="h-6 p-2 pl-8 pr-8 bg-gray-200"
       />
       {query ? (
         <Button
