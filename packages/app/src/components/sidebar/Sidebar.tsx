@@ -172,9 +172,10 @@ export function Sidebar() {
           paddingTop: Number(insets.top) + 8,
           paddingLeft: 16,
         }}
-        className="flex min-h-10 items-center gap-2"
+        className="flex min-h-10 items-center gap-2 pr-2"
       >
         <span className="font-semibold">{APP_NAME}</span>
+        <ThemeToggle className="ml-auto" />
       </div>
 
       <SearchBar className="px-2 pt-2" />
@@ -247,7 +248,6 @@ export function Sidebar() {
         >
           <FolderPlus />
         </Button>
-        <ThemeToggle />
       </div>
 
       <NewListDialog open={newListOpen} onOpenChange={setNewListOpen} />
