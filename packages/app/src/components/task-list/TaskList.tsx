@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ArrowDownAZ, ArrowUpDown, Calendar, Star } from "lucide-react";
+import { ArrowDownAZ, ArrowUpDown, Bookmark, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -119,7 +119,7 @@ function SortMenu() {
           Due date
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => setSort("importance")}>
-          <Star />
+          <Bookmark />
           Importance
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => setSort("alpha")}>

@@ -36,7 +36,7 @@ export function SmartListSection() {
 
   return (
     <ul className="flex flex-col gap-0.5 px-2">
-      {SMART_LISTS.map(({ id, label, icon: Icon }) => {
+      {SMART_LISTS.map(({ id, label, icon: Icon, iconColor, iconBg }) => {
         const isActive = selected.kind === "smart" && selected.id === id;
         const count = counts[id];
         return (
@@ -45,13 +45,15 @@ export function SmartListSection() {
               type="button"
               onClick={() => selectList({ kind: "smart", id })}
               className={cn(
-                "flex w-full items-center gap-3 rounded-md px-3 py-1.5 text-left text-sm transition-colors",
+                "flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
                 isActive
                   ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                   : "hover:bg-sidebar-accent/60",
               )}
             >
-              <Icon className="size-4 shrink-0" />
+              <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg", iconBg)}>
+                <Icon className={cn("size-3.5", iconColor)} />
+              </div>
               <span className="flex-1 truncate">{label}</span>
               {count > 0 ? (
                 <span className="text-xs text-muted-foreground tabular-nums">

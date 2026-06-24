@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Bell, Calendar, ListChecks, Repeat, StickyNote, Star } from "lucide-react";
+import { Bell, Bookmark, Calendar, ListChecks, Repeat, StickyNote } from "lucide-react";
 import { RoundCheckbox } from "@/components/ui/round-checkbox";
 import { cn } from "@/utils/cn";
 import { formatDue, startOfDay } from "@/utils";
@@ -70,7 +70,7 @@ export function TaskRow({ task }: TaskRowProps) {
       }}
       className={cn(
         "group flex w-full cursor-default items-start gap-3 rounded-md border border-transparent bg-card px-3 py-2.5 text-sm shadow-xs transition-colors hover:bg-accent/60 focus-visible:ring-[2px] focus-visible:ring-ring/50 focus-visible:outline-none",
-        isActive && "border-ring bg-accent",
+        isActive && "border-primary/20 bg-accent shadow-sm",
       )}
     >
       <RoundCheckbox
@@ -101,7 +101,7 @@ export function TaskRow({ task }: TaskRowProps) {
               <span
                 className={cn(
                   "inline-flex items-center gap-1",
-                  isOverdue && "text-destructive",
+                  isOverdue ? "text-destructive" : "text-sky-500",
                 )}
               >
                 <Calendar className="size-3" />
@@ -109,25 +109,25 @@ export function TaskRow({ task }: TaskRowProps) {
               </span>
             ) : null}
             {reminderLabel ? (
-              <span className="inline-flex items-center gap-1">
+              <span className="inline-flex items-center gap-1 text-amber-500">
                 <Bell className="size-3" />
                 {reminderLabel}
               </span>
             ) : null}
             {task.repeat ? (
-              <span className="inline-flex items-center gap-1">
+              <span className="inline-flex items-center gap-1 text-emerald-500">
                 <Repeat className="size-3" />
                 {task.repeat.kind}
               </span>
             ) : null}
             {total > 0 ? (
-              <span className="inline-flex items-center gap-1 tabular-nums">
+              <span className="inline-flex items-center gap-1 tabular-nums text-violet-500">
                 <ListChecks className="size-3" />
                 {done}/{total}
               </span>
             ) : null}
             {hasNotes ? (
-              <span className="inline-flex items-center gap-1">
+              <span className="inline-flex items-center gap-1 text-orange-400">
                 <StickyNote className="size-3" />
                 Note
               </span>
@@ -139,14 +139,14 @@ export function TaskRow({ task }: TaskRowProps) {
       <button
         type="button"
         onClick={handleStar}
-        aria-label={isImportant ? "Unstar task" : "Star task"}
+        aria-label={isImportant ? "Remove flag" : "Flag as important"}
         aria-pressed={isImportant}
         className={cn(
-          "mt-0.5 shrink-0 rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-[2px] focus-visible:ring-ring/50 focus-visible:outline-none",
-          isImportant && "text-primary hover:text-primary",
+          "mt-0.5 shrink-0 rounded-sm p-0.5 text-muted-foreground/50 transition-colors hover:text-rose-400 focus-visible:ring-[2px] focus-visible:ring-ring/50 focus-visible:outline-none",
+          isImportant && "text-rose-500 hover:text-rose-500",
         )}
       >
-        <Star
+        <Bookmark
           className={cn("size-4", isImportant && "fill-current")}
         />
       </button>
