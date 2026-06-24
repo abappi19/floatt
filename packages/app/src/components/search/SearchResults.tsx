@@ -91,7 +91,7 @@ export function SearchResults() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex h-12 items-center gap-3 border-b px-4">
+      <header className="flex h-10 items-center gap-3 border-b px-4">
         <span className="font-semibold">Search</span>
         <span className="text-xs text-muted-foreground">
           {taskHits.length + subtaskHits.length} results

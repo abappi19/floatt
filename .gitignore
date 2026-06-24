@@ -28,3 +28,6 @@ packages/*/node_modules/
 *.njsproj
 *.sln
 *.sw?
+
+# kitten-bot drafts
+_kitten-bot/

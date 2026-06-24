@@ -64,7 +64,7 @@ function TaskSection({ title, tasks }: { title: string; tasks: Task[] }) {
       <h3 className="px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {title}
       </h3>
-      <ul className="flex flex-col gap-1.5">
+      <ul className="flex flex-col gap-1">
         {tasks.map((t) => (
           <li key={t.id}>
             <TaskRow task={t} />
@@ -78,7 +78,7 @@ function TaskSection({ title, tasks }: { title: string; tasks: Task[] }) {
 function TaskFlatList({ tasks }: { tasks: Task[] }) {
   if (tasks.length === 0) return null;
   return (
-    <ul className="flex flex-col gap-1.5">
+    <ul className="flex flex-col gap-1">
       {tasks.map((t) => (
         <li key={t.id}>
           <TaskRow task={t} />
@@ -296,7 +296,7 @@ export function TaskList() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex h-12 items-center gap-3 border-b px-4">
+      <header className="flex h-10 items-center gap-3 border-b px-4">
         <span className="font-semibold">{title}</span>
         <HeaderCount selection={selection} />
         <div className="ml-auto">

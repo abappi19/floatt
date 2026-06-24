@@ -23,7 +23,7 @@ export function TaskDetail() {
 
   return (
     <aside className="flex h-full w-full flex-col border-l bg-muted/20">
-      <div className="flex h-12 items-center border-b px-4">
+      <div className="flex h-10 items-center border-b px-4">
         <span className="font-semibold">Details</span>
       </div>
 

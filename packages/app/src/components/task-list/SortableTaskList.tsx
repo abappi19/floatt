@@ -65,7 +65,7 @@ export function SortableTaskList({ tasks }: { tasks: Task[] }) {
         items={tasks.map((t) => t.id)}
         strategy={verticalListSortingStrategy}
       >
-        <ul className="flex flex-col gap-1.5">
+        <ul className="flex flex-col gap-1">
           {tasks.map((t) => (
             <SortableTask key={t.id} task={t} />
           ))}

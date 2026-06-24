@@ -46,7 +46,7 @@ export function CompletedAccordion({ tasks }: CompletedAccordionProps) {
         )}
       >
         <div className="overflow-hidden">
-          <ul className="flex flex-col gap-1.5 pb-1">
+          <ul className="flex flex-col gap-1 pb-1">
             {sorted.map((t) => (
               <li key={t.id}>
                 <TaskRow task={t} />
