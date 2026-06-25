@@ -30,6 +30,7 @@ import { SubgroupItem } from "./subgroup-item.component";
 import { NewListDialog } from "./new-list-dialog.component";
 import { NewGroupDialog } from "./new-group-dialog.component";
 import { DragOverlayRow } from "./drag-overlay-row.component";
+import floattIcon from "@/assets/icons/floatt-icon.png";
 import {
   type FlatItem,
   type Projection,
@@ -157,8 +158,9 @@ export function Sidebar() {
           paddingTop: Number(insets.top) + 8,
           paddingLeft: 16,
         }}
-        className="flex min-h-10 items-center gap-2 pr-2"
+        className="flex min-h-10 items-center pr-2"
       >
+        <img src={floattIcon} alt="" className="size-5" />
         <span className="font-semibold">{APP_NAME}</span>
         <ThemeToggle className="ml-auto" />
       </div>
