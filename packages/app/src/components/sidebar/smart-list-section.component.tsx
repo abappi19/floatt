@@ -58,7 +58,7 @@ export function SmartListSection() {
                 <span className="block truncate min-w-0">{label}</span>
               </div>
               <span className="text-xs text-muted-foreground tabular-nums">
-                {count > 0 ? 0 : ""}
+                {count > 0 ? count : ""}
               </span>
             </button>
           </li>
