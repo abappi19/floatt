@@ -9,7 +9,6 @@
     "jsx": "preserve",
     "esModuleInterop": true,
     "incremental": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": [
         "../../packages/app/src/*"
