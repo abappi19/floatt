@@ -1,1 +1,1 @@
-export { PlatformProvider, usePlatform } from "./PlatformProvider";
+export { PlatformProvider, usePlatform } from "./platform.provider";

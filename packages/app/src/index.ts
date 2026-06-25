@@ -7,7 +7,7 @@ export type {
   PlatformWindow,
   WindowControls,
   WindowInsets,
-} from "./platform/platform.types";
-export { PlatformProvider, usePlatform } from "./providers/PlatformProvider";
-export { ThemeProvider } from "./providers/ThemeProvider";
-export { NotificationProvider } from "./providers/NotificationProvider";
+} from "./platform/platform.type";
+export { PlatformProvider, usePlatform } from "./providers/platform.provider";
+export { ThemeProvider } from "./providers/theme.provider";
+export { NotificationProvider } from "./providers/notification.provider";

@@ -3,4 +3,4 @@ export type {
   Platform,
   PlatformNotifications,
   PlatformOpener,
-} from "./platform.types";
+} from "./platform.type";
