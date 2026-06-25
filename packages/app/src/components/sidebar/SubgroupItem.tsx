@@ -18,11 +18,13 @@ import {
   renameSubgroup,
 } from "@/services";
 import { SidebarContextMenu } from "./SidebarContextMenu";
+import { SUBGROUP_INDENT_PX, TREE_BASE_PADDING_PX } from "./tree";
 
 interface SubgroupItemProps {
   subgroup: Subgroup;
   groups: Group[];
-  indent?: boolean;
+  /** Tree depth (0 = standalone, 1 = inside a group); drives indentation. */
+  depth?: number;
 }
 
 function toTransform(
@@ -32,7 +34,11 @@ function toTransform(
   return `translate3d(${t.x}px, ${t.y}px, 0) scaleX(${t.scaleX}) scaleY(${t.scaleY})`;
 }
 
-export function SubgroupItem({ subgroup, groups, indent }: SubgroupItemProps) {
+export function SubgroupItem({
+  subgroup,
+  groups,
+  depth = 0,
+}: SubgroupItemProps) {
   const selected = useSelectedList();
   const selectList = useSelectList();
   const tasks = useTasks(subgroup.id);
@@ -96,6 +102,7 @@ export function SubgroupItem({ subgroup, groups, indent }: SubgroupItemProps) {
     transform: toTransform(transform),
     transition,
     opacity: isDragging ? 0.6 : undefined,
+    paddingLeft: TREE_BASE_PADDING_PX + depth * SUBGROUP_INDENT_PX,
   };
 
   return (
@@ -106,8 +113,7 @@ export function SubgroupItem({ subgroup, groups, indent }: SubgroupItemProps) {
         {...attributes}
         {...listeners}
         className={cn(
-          "group relative flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors",
-          indent && "pl-7",
+          "group relative flex w-full items-center gap-2 rounded-md pr-3 py-1.5 text-sm transition-colors",
           isActive
             ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
             : "hover:bg-sidebar-accent/60",
@@ -116,7 +122,7 @@ export function SubgroupItem({ subgroup, groups, indent }: SubgroupItemProps) {
         <button
           type="button"
           onClick={handleSelect}
-          className="flex flex-1 items-center gap-3 text-left outline-none"
+          className="flex min-w-0 flex-1 items-center gap-3 text-left outline-none"
         >
           <ListTodo className="size-4 shrink-0" />
           {isRenaming ? (
@@ -139,7 +145,7 @@ export function SubgroupItem({ subgroup, groups, indent }: SubgroupItemProps) {
               className="flex-1 min-w-0 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none focus-visible:ring-[2px] focus-visible:ring-ring/50"
             />
           ) : (
-            <span className="flex-1 truncate">{subgroup.name}</span>
+            <span className="min-w-0 flex-1 truncate">{subgroup.name}</span>
           )}
           {!isRenaming && pendingCount > 0 ? (
             <span className="text-xs text-muted-foreground tabular-nums">

@@ -1,29 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
 import { useCommandStore } from "@/stores";
-import { Plus, FolderPlus } from "lucide-react";
+import { Plus, FolderPlus, Folder, ListTodo } from "lucide-react";
 import {
   DndContext,
+  DragOverlay,
   type DragEndEvent,
+  type DragMoveEvent,
+  type DragOverEvent,
   type DragStartEvent,
+  MeasuringStrategy,
   PointerSensor,
+  type UniqueIdentifier,
   closestCenter,
-  useDroppable,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { APP_NAME } from "@/consts";
 import { useGroups, useSubgroups, useWindowInsets } from "@/hooks";
-import {
-  moveSubgroupToGroup,
-  reorderGroups,
-  reorderSubgroups,
-} from "@/services";
-import { cn } from "@/utils/cn";
+import { moveSubgroupToGroup, reorderGroups } from "@/services";
 import { SearchBar } from "@/components/search/SearchBar";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { SmartListSection } from "./SmartListSection";
@@ -31,26 +29,32 @@ import { GroupItem } from "./GroupItem";
 import { SubgroupItem } from "./SubgroupItem";
 import { NewListDialog } from "./NewListDialog";
 import { NewGroupDialog } from "./NewGroupDialog";
+import {
+  type FlatItem,
+  type Projection,
+  SUBGROUP_INDENT_PX,
+  applyDrop,
+  buildFlatTree,
+  getProjection,
+  removeChildrenOf,
+} from "./tree";
 
-type DragKind = "group" | "subgroup" | null;
+const measuring = {
+  droppable: { strategy: MeasuringStrategy.Always },
+};
 
-function RootDropZone({ active }: { active: boolean }) {
-  const { setNodeRef, isOver } = useDroppable({
-    id: "sidebar-root-dropzone",
-    data: { type: "root-dropzone" },
-  });
-  if (!active) return null;
+function DragOverlayRow({ item }: { item: FlatItem }) {
+  const isGroup = item.node.type === "group";
+  const name =
+    item.node.type === "group" ? item.node.group.name : item.node.subgroup.name;
   return (
-    <div
-      ref={setNodeRef}
-      className={cn(
-        "mx-2 mt-1 flex h-9 items-center justify-center rounded-md border border-dashed text-xs text-muted-foreground transition-colors",
-        isOver
-          ? "border-primary/60 bg-primary/10 text-foreground"
-          : "border-border/60",
+    <div className="flex w-full items-center gap-2 rounded-md border bg-sidebar px-3 py-1.5 text-sm shadow-md">
+      {isGroup ? (
+        <Folder className="size-4 shrink-0" />
+      ) : (
+        <ListTodo className="size-4 shrink-0" />
       )}
-    >
-      Drop here to ungroup
+      <span className="truncate font-medium">{name}</span>
     </div>
   );
 }
@@ -67,103 +71,99 @@ export function Sidebar() {
     if (openNewListNonce === 0) return;
     setNewListOpen(true);
   }, [openNewListNonce]);
-  const [dragKind, setDragKind] = useState<DragKind>(null);
 
-  const standaloneSubgroups = useMemo(
-    () => subgroups.filter((s) => s.groupId === null),
-    [subgroups],
+  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
+  const [offsetLeft, setOffsetLeft] = useState(0);
+
+  const flatItems = useMemo(
+    () => buildFlatTree(groups, subgroups),
+    [groups, subgroups],
   );
+
+  const activeItem = activeId
+    ? flatItems.find((i) => i.id === activeId)
+    : undefined;
+
+  // While dragging a group, hide its children so only the folder moves.
+  const displayItems = useMemo<FlatItem[]>(() => {
+    if (activeId && activeItem?.node.type === "group") {
+      return removeChildrenOf(flatItems, String(activeId));
+    }
+    return flatItems;
+  }, [flatItems, activeId, activeItem]);
+
+  const sortedIds = useMemo(() => displayItems.map((i) => i.id), [displayItems]);
+
+  const projection: Projection | null =
+    activeId && overId
+      ? getProjection(
+          displayItems,
+          String(activeId),
+          String(overId),
+          offsetLeft,
+          SUBGROUP_INDENT_PX,
+        )
+      : null;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const type = event.active.data.current?.type;
-    setDragKind(type === "group" || type === "subgroup" ? type : null);
+  const resetDrag = () => {
+    setActiveId(null);
+    setOverId(null);
+    setOffsetLeft(0);
   };
 
-  const handleDragCancel = () => setDragKind(null);
+  const handleDragStart = ({ active }: DragStartEvent) => {
+    setActiveId(active.id);
+    setOverId(active.id);
+  };
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    setDragKind(null);
-    const { active, over } = event;
-    if (!over) return;
+  const handleDragMove = ({ delta }: DragMoveEvent) => {
+    setOffsetLeft(delta.x);
+  };
 
-    const activeType = active.data.current?.type as string | undefined;
-    const overType = over.data.current?.type as string | undefined;
+  const handleDragOver = ({ over }: DragOverEvent) => {
+    setOverId(over?.id ?? null);
+  };
 
-    if (activeType === "group") {
-      if (overType !== "group" || active.id === over.id) return;
-      const ids = groups.map((g) => g.id);
-      const from = ids.indexOf(active.id as string);
-      const to = ids.indexOf(over.id as string);
-      if (from < 0 || to < 0 || from === to) return;
-      const next = [...ids];
-      next.splice(from, 1);
-      next.splice(to, 0, active.id as string);
-      void reorderGroups(next);
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    const moved = activeItem;
+    const dragOffset = offsetLeft;
+    resetDrag();
+    if (!over || !moved) return;
+
+    const proj = getProjection(
+      displayItems,
+      String(active.id),
+      String(over.id),
+      dragOffset,
+      SUBGROUP_INDENT_PX,
+    );
+    const next = applyDrop(
+      displayItems,
+      String(active.id),
+      String(over.id),
+      proj,
+    );
+
+    if (moved.node.type === "group") {
+      const orderedGroupIds = next
+        .filter((i) => i.node.type === "group")
+        .map((i) => i.id);
+      void reorderGroups(orderedGroupIds);
       return;
     }
 
-    if (activeType !== "subgroup") return;
-
-    const activeSub = subgroups.find((s) => s.id === active.id);
-    if (!activeSub) return;
-    const activeGroupId = activeSub.groupId;
-
-    let targetGroupId: string | null;
-    let targetIndex: number;
-
-    if (overType === "subgroup") {
-      const overSub = subgroups.find((s) => s.id === over.id);
-      if (!overSub) return;
-      targetGroupId = overSub.groupId;
-      const siblings = subgroups
-        .filter((s) => s.groupId === targetGroupId && s.id !== active.id)
-        .map((s) => s.id);
-      targetIndex = siblings.indexOf(over.id as string);
-      if (targetIndex < 0) targetIndex = siblings.length;
-    } else if (overType === "group") {
-      // Drop subgroup onto a group header → place at end of that group
-      targetGroupId = over.id as string;
-      const siblings = subgroups
-        .filter((s) => s.groupId === targetGroupId && s.id !== active.id)
-        .map((s) => s.id);
-      targetIndex = siblings.length;
-    } else if (overType === "root-dropzone") {
-      targetGroupId = null;
-      const siblings = subgroups
-        .filter((s) => s.groupId === null && s.id !== active.id)
-        .map((s) => s.id);
-      targetIndex = siblings.length;
-    } else {
-      return;
-    }
-
-    const siblingsInTarget = subgroups
-      .filter((s) => s.groupId === targetGroupId && s.id !== active.id)
-      .map((s) => s.id);
-    const newOrder = [...siblingsInTarget];
-    newOrder.splice(targetIndex, 0, active.id as string);
-
-    if (activeGroupId === targetGroupId) {
-      const current = subgroups
-        .filter((s) => s.groupId === targetGroupId)
-        .map((s) => s.id)
-        .join(",");
-      if (current === newOrder.join(",")) return;
-      void reorderSubgroups(newOrder);
-    } else {
-      void moveSubgroupToGroup(active.id as string, targetGroupId, newOrder);
-    }
+    const orderedSiblings = next
+      .filter((i) => i.node.type === "subgroup" && i.parentId === proj.parentId)
+      .map((i) => i.id);
+    void moveSubgroupToGroup(String(active.id), proj.parentId, orderedSiblings);
   };
 
-  const groupIds = useMemo(() => groups.map((g) => g.id), [groups]);
-  const standaloneIds = useMemo(
-    () => standaloneSubgroups.map((s) => s.id),
-    [standaloneSubgroups],
-  );
+  const hasContent = flatItems.length > 0;
 
   return (
     <aside className="flex h-full w-full flex-col border-r bg-sidebar text-sidebar-foreground">
@@ -184,49 +184,52 @@ export function Sidebar() {
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
-          modifiers={[restrictToVerticalAxis]}
+          measuring={measuring}
           onDragStart={handleDragStart}
+          onDragMove={handleDragMove}
+          onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
-          onDragCancel={handleDragCancel}
+          onDragCancel={resetDrag}
         >
           <div className="flex flex-col gap-3 py-3">
             <SmartListSection />
 
             <Separator className="mx-2" />
 
-            <div className="flex flex-col gap-1 px-2">
+            <div className="flex flex-col gap-0.5 px-2">
               <SortableContext
-                items={groupIds}
+                items={sortedIds}
                 strategy={verticalListSortingStrategy}
               >
-                {groups.map((g) => (
-                  <GroupItem key={g.id} group={g} allGroups={groups} />
-                ))}
+                {displayItems.map((item) => {
+                  const isActive = item.id === activeId;
+                  if (item.node.type === "group") {
+                    return <GroupItem key={item.id} group={item.node.group} />;
+                  }
+                  const depth =
+                    isActive && projection ? projection.depth : item.depth;
+                  return (
+                    <SubgroupItem
+                      key={item.id}
+                      subgroup={item.node.subgroup}
+                      groups={groups}
+                      depth={depth}
+                    />
+                  );
+                })}
               </SortableContext>
 
-              <SortableContext
-                items={standaloneIds}
-                strategy={verticalListSortingStrategy}
-              >
-                {standaloneSubgroups.length > 0 ? (
-                  <ul className="flex flex-col gap-0.5">
-                    {standaloneSubgroups.map((s) => (
-                      <li key={s.id}>
-                        <SubgroupItem subgroup={s} groups={groups} />
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-                <RootDropZone active={dragKind === "subgroup"} />
-              </SortableContext>
-
-              {groups.length === 0 && standaloneSubgroups.length === 0 ? (
+              {!hasContent ? (
                 <p className="px-3 py-2 text-xs text-muted-foreground/80">
                   Create a list to organize your tasks.
                 </p>
               ) : null}
             </div>
           </div>
+
+          <DragOverlay>
+            {activeItem ? <DragOverlayRow item={activeItem} /> : null}
+          </DragOverlay>
         </DndContext>
       </ScrollArea>
 

@@ -36,7 +36,7 @@ export function SmartListSection() {
 
   return (
     <ul className="flex flex-col">
-      {SMART_LISTS.map(({ id, label, icon: Icon, iconColor, iconBg }) => {
+      {SMART_LISTS.map(({ id, label, icon: Icon, iconColor }) => {
         const isActive = selected.kind === "smart" && selected.id === id;
         const count = counts[id];
         return (

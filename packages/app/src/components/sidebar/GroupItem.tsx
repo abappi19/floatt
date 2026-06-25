@@ -1,10 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronRight, Folder } from "lucide-react";
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
 import type { Group } from "@/types";
 import { cn } from "@/utils/cn";
 import { useSubgroupsByGroup } from "@/hooks";
@@ -19,11 +15,9 @@ import {
   toggleGroupCollapse,
 } from "@/services";
 import { SidebarContextMenu } from "./SidebarContextMenu";
-import { SubgroupItem } from "./SubgroupItem";
 
 interface GroupItemProps {
   group: Group;
-  allGroups: Group[];
 }
 
 function toTransform(
@@ -33,7 +27,7 @@ function toTransform(
   return `translate3d(${t.x}px, ${t.y}px, 0) scaleX(${t.scaleX}) scaleY(${t.scaleY})`;
 }
 
-export function GroupItem({ group, allGroups }: GroupItemProps) {
+export function GroupItem({ group }: GroupItemProps) {
   const subgroups = useSubgroupsByGroup(group.id);
 
   const [isRenaming, setIsRenaming] = useState(false);
@@ -60,13 +54,6 @@ export function GroupItem({ group, allGroups }: GroupItemProps) {
       inputRef.current?.select();
     }
   }, [isRenaming]);
-
-  const otherGroups = useMemo(
-    () => allGroups.filter((g) => g.id !== group.id),
-    [allGroups, group.id],
-  );
-
-  const subgroupIds = useMemo(() => subgroups.map((s) => s.id), [subgroups]);
 
   const startRename = () => {
     setDraftName(group.name);
@@ -98,82 +85,69 @@ export function GroupItem({ group, allGroups }: GroupItemProps) {
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="flex flex-col">
-      <div
-        {...attributes}
-        {...listeners}
-        className={cn(
-          "group relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent/60",
-        )}
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={cn(
+        "group relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent/60",
+      )}
+    >
+      <button
+        type="button"
+        onClick={toggle}
+        className="flex min-w-0 flex-1 items-center gap-2 text-left outline-none"
+        aria-expanded={!group.isCollapsed}
       >
-        <button
-          type="button"
-          onClick={toggle}
-          className="flex flex-1 items-center gap-2 text-left outline-none"
-          aria-expanded={!group.isCollapsed}
-        >
-          <ChevronRight
-            className={cn(
-              "size-4 shrink-0 text-muted-foreground transition-transform",
-              !group.isCollapsed && "rotate-90",
-            )}
-          />
-          <Folder className="size-4 shrink-0" />
-          {isRenaming ? (
-            <input
-              ref={inputRef}
-              value={draftName}
-              onChange={(e) => setDraftName(e.target.value)}
-              onBlur={commitRename}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  commitRename();
-                } else if (e.key === "Escape") {
-                  e.preventDefault();
-                  cancelRename();
-                }
-              }}
-              onClick={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              className="flex-1 min-w-0 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none focus-visible:ring-[2px] focus-visible:ring-ring/50"
-            />
-          ) : (
-            <span className="flex-1 truncate font-medium">{group.name}</span>
+        <ChevronRight
+          className={cn(
+            "size-4 shrink-0 text-muted-foreground transition-transform",
+            !group.isCollapsed && "rotate-90",
           )}
-          {!isRenaming && subgroups.length > 0 ? (
-            <span className="text-xs text-muted-foreground tabular-nums">
-              {subgroups.length}
-            </span>
-          ) : null}
-        </button>
-        {!isRenaming ? (
-          <SidebarContextMenu label={`${group.name} options`}>
-            <DropdownMenuItem onSelect={startRename}>Rename</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              onSelect={() => setConfirmDelete(true)}
-            >
-              Delete group
-            </DropdownMenuItem>
-          </SidebarContextMenu>
+        />
+        <Folder className="size-4 shrink-0" />
+        {isRenaming ? (
+          <input
+            ref={inputRef}
+            value={draftName}
+            onChange={(e) => setDraftName(e.target.value)}
+            onBlur={commitRename}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                commitRename();
+              } else if (e.key === "Escape") {
+                e.preventDefault();
+                cancelRename();
+              }
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="min-w-0 flex-1 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none focus-visible:ring-[2px] focus-visible:ring-ring/50"
+          />
+        ) : (
+          <span className="min-w-0 flex-1 truncate font-medium">
+            {group.name}
+          </span>
+        )}
+        {!isRenaming && subgroups.length > 0 ? (
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {subgroups.length}
+          </span>
         ) : null}
-      </div>
-
-      {!group.isCollapsed ? (
-        <SortableContext
-          items={subgroupIds}
-          strategy={verticalListSortingStrategy}
-        >
-          <ul className="flex flex-col gap-0.5">
-            {subgroups.map((s) => (
-              <li key={s.id}>
-                <SubgroupItem subgroup={s} groups={otherGroups} indent />
-              </li>
-            ))}
-          </ul>
-        </SortableContext>
+      </button>
+      {!isRenaming ? (
+        <SidebarContextMenu label={`${group.name} options`}>
+          <DropdownMenuItem onSelect={startRename}>Rename</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            onSelect={() => setConfirmDelete(true)}
+          >
+            Delete group
+          </DropdownMenuItem>
+        </SidebarContextMenu>
       ) : null}
 
       <ConfirmDestructiveDialog
