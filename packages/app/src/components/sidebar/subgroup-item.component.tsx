@@ -4,20 +4,17 @@ import { useSortable } from "@dnd-kit/sortable";
 import type { Group, Subgroup } from "@/types";
 import { cn } from "@/utils/cn.util";
 import { useTasks, useSelectList, useSelectedList } from "@/hooks";
-import {
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-} from "@/components/ui/dropdown-menu.ui";
 import { ConfirmDestructiveDialog } from "@/components/ui/confirm-destructive-dialog.ui";
 import {
   deleteSubgroup,
   moveSubgroup,
   renameSubgroup,
 } from "@/services";
-import { SidebarContextMenu } from "./sidebar-context-menu.component";
+import {
+  SidebarItemContextMenu,
+  SidebarItemMenu,
+  type SidebarMenuAction,
+} from "./sidebar-item-menu.component";
 import { SUBGROUP_INDENT_PX, TREE_BASE_PADDING_PX } from "./tree.util";
 
 interface SubgroupItemProps {
@@ -105,88 +102,95 @@ export function SubgroupItem({
     paddingLeft: TREE_BASE_PADDING_PX + depth * SUBGROUP_INDENT_PX,
   };
 
+  const actions: SidebarMenuAction[] = [
+    { kind: "item", label: "Rename", onSelect: startRename },
+    {
+      kind: "submenu",
+      label: "Move to group",
+      items: [
+        {
+          kind: "item",
+          label: "No group",
+          disabled: subgroup.groupId === null,
+          onSelect: () => moveSubgroup(subgroup.id, null),
+        },
+        ...(groups.length > 0
+          ? [{ kind: "separator" as const }]
+          : []),
+        ...groups.map<SidebarMenuAction>((g) => ({
+          kind: "item",
+          label: g.name,
+          disabled: g.id === subgroup.groupId,
+          onSelect: () => moveSubgroup(subgroup.id, g.id),
+        })),
+      ],
+    },
+    { kind: "separator" },
+    {
+      kind: "item",
+      label: "Delete list",
+      variant: "destructive",
+      onSelect: () => setConfirmDelete(true),
+    },
+  ];
+
   return (
     <>
-      <div
-        ref={setNodeRef}
-        style={style}
-        {...attributes}
-        {...listeners}
-        className={cn(
-          "group relative flex w-full items-center gap-2 rounded-md text-sm transition-colors",
-          isActive
-            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-            : "hover:bg-sidebar-accent/60",
-        )}
-      >
-        <button
-          type="button"
-          onClick={handleSelect}
-          className="flex min-w-0 flex-1 items-center gap-3 text-left outline-none"
-        >
-          <ListTodo className="size-4 shrink-0" />
-          {isRenaming ? (
-            <input
-              ref={inputRef}
-              value={draftName}
-              onChange={(e) => setDraftName(e.target.value)}
-              onBlur={commitRename}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  commitRename();
-                } else if (e.key === "Escape") {
-                  e.preventDefault();
-                  cancelRename();
-                }
-              }}
-              onClick={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              className="flex-1 min-w-0 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none focus-visible:ring-[2px] focus-visible:ring-ring/50"
-            />
-          ) : (
-            <span className="min-w-0 flex-1 truncate">{subgroup.name}</span>
+      <SidebarItemContextMenu actions={actions} disabled={isRenaming}>
+        <div
+          ref={setNodeRef}
+          style={style}
+          {...attributes}
+          {...listeners}
+          className={cn(
+            "group relative flex w-full items-center gap-2 rounded-md text-sm transition-colors",
+            isActive
+              ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+              : "hover:bg-sidebar-accent/60",
           )}
-          {!isRenaming && pendingCount > 0 ? (
-            <span className="text-xs text-muted-foreground tabular-nums">
-              {pendingCount}
-            </span>
+        >
+          <button
+            type="button"
+            onClick={handleSelect}
+            className="flex min-w-0 flex-1 items-center gap-3 text-left outline-none"
+          >
+            <ListTodo className="size-4 shrink-0" />
+            {isRenaming ? (
+              <input
+                ref={inputRef}
+                value={draftName}
+                onChange={(e) => setDraftName(e.target.value)}
+                onBlur={commitRename}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    commitRename();
+                  } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    cancelRename();
+                  }
+                }}
+                onClick={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="flex-1 min-w-0 rounded-sm border border-input bg-background px-1 py-0.5 text-sm outline-none focus-visible:ring-[2px] focus-visible:ring-ring/50"
+              />
+            ) : (
+              <span className="min-w-0 flex-1 truncate">{subgroup.name}</span>
+            )}
+            {!isRenaming && pendingCount > 0 ? (
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {pendingCount}
+              </span>
+            ) : null}
+          </button>
+          {!isRenaming ? (
+            <SidebarItemMenu
+              actions={actions}
+              label={`${subgroup.name} options`}
+            />
           ) : null}
-        </button>
-        {!isRenaming ? (
-          <SidebarContextMenu label={`${subgroup.name} options`}>
-            <DropdownMenuItem onSelect={startRename}>Rename</DropdownMenuItem>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>Move to group</DropdownMenuSubTrigger>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem
-                  onSelect={() => moveSubgroup(subgroup.id, null)}
-                  disabled={subgroup.groupId === null}
-                >
-                  No group
-                </DropdownMenuItem>
-                {groups.length > 0 ? <DropdownMenuSeparator /> : null}
-                {groups.map((g) => (
-                  <DropdownMenuItem
-                    key={g.id}
-                    onSelect={() => moveSubgroup(subgroup.id, g.id)}
-                    disabled={g.id === subgroup.groupId}
-                  >
-                    {g.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              onSelect={() => setConfirmDelete(true)}
-            >
-              Delete list
-            </DropdownMenuItem>
-          </SidebarContextMenu>
-        ) : null}
-      </div>
+        </div>
+      </SidebarItemContextMenu>
       <ConfirmDestructiveDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
