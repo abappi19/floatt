@@ -54,12 +54,12 @@ export function SmartListSection() {
               <div className={cn("py-px pl-3 pr-1 flex h-7 w-8 shrink-0 items-center justify-center xrounded-tr-lg xrounded-br-lg")}>
                 <Icon className={cn("size-3.5", iconColor)} />
               </div>
-              <span className="flex-1 truncate">{label}</span>
-              {count > 0 ? (
-                <span className="text-xs text-muted-foreground tabular-nums">
-                  {count}
-                </span>
-              ) : null}
+              <div className="grow min-w-0">
+                <span className="block truncate min-w-0">{label}</span>
+              </div>
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {count > 0 ? 0 : ""}
+              </span>
             </button>
           </li>
         );
