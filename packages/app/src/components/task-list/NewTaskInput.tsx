@@ -39,7 +39,6 @@ export function NewTaskInput({ selection }: NewTaskInputProps) {
       ? PLACEHOLDER[selection.id]
       : "Add a task";
 
-  // Reset draft when switching lists
   useEffect(() => {
     setTitle("");
   }, [selection.kind, selection.kind === "smart" ? selection.id : selection.id]);

@@ -78,3 +78,9 @@ Two aliases resolve to the shared package source and must stay in sync across co
 - `@floatt/app/*` subpath exports (e.g. `@floatt/app/platform`, `@floatt/app/utils`) are declared in `packages/app/package.json` `exports`. Apps consume the package via these; the shared package itself uses `@/*` internally.
 
 The workspace source is consumed directly (not pre-bundled): desktop's `vite.config.ts` sets `optimizeDeps.exclude: ["@floatt/app"]`; web's `next.config.mjs` sets `transpilePackages: ["@floatt/app"]`.
+
+## Code style
+
+Write self-documenting code — let names carry the meaning (code-is-comment). Do not narrate what the code already states: no comments restating the line below them, no section-divider banners, no docblocks that just echo the signature.
+
+Keep a comment only when it explains **why** — a non-obvious trade-off, a workaround, a constraint the code itself can't express — or warns of a sharp edge. When tempted to comment *what* something does, rename or extract a small function instead.
