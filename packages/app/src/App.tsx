@@ -1,8 +1,8 @@
-import { ThemeProvider } from "@/providers/ThemeProvider";
-import { NotificationProvider } from "@/providers/NotificationProvider";
-import { TodoScreen } from "@/screens/TodoScreen";
-import { Toaster } from "@/components/ui/toaster";
-import { ConfirmDestructiveDialog } from "@/components/ui/confirm-destructive-dialog";
+import { ThemeProvider } from "@/providers/theme.provider";
+import { NotificationProvider } from "@/providers/notification.provider";
+import { TodoScreen } from "@/screens/todo.screen";
+import { Toaster } from "@/components/ui/toaster.ui";
+import { ConfirmDestructiveDialog } from "@/components/ui/confirm-destructive-dialog.ui";
 import { useCommandStore } from "@/stores";
 import { useUiStore } from "@/stores/ui.store";
 import { useKeyboardShortcuts, useReminders } from "@/hooks";

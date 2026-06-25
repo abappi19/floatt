@@ -1,22 +1,22 @@
-export { getAllGroups, getGroupById } from "./group.queries";
+export { getAllGroups, getGroupById } from "./group.query";
 export {
   getAllSubgroups,
   getSubgroupsByGroup,
   getSubgroupById,
-} from "./subgroup.queries";
+} from "./subgroup.query";
 export {
   getTasksBySubgroup,
   getTaskById,
   getAllTasks,
   getTasksWithReminders,
-} from "./task.queries";
-export { getSubtasksByTask } from "./subtask.queries";
+} from "./task.query";
+export { getSubtasksByTask } from "./subtask.query";
 export {
   getMyDayTasks,
   getImportantTasks,
   getPlannedTasks,
   getAllNonCompletedTasks,
-} from "./smart-list.queries";
-export type { PlannedBuckets } from "./smart-list.queries";
-export { getMyDaySuggestions } from "./my-day-suggestions.queries";
-export type { MyDaySuggestion } from "./my-day-suggestions.queries";
+} from "./smart-list.query";
+export type { PlannedBuckets } from "./smart-list.query";
+export { getMyDaySuggestions } from "./my-day-suggestions.query";
+export type { MyDaySuggestion } from "./my-day-suggestions.query";

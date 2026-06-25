@@ -1,3 +1,3 @@
-export * from "./db.consts";
-export * from "./smart-lists.consts";
-export * from "./app.consts";
+export * from "./db.const";
+export * from "./smart-lists.const";
+export * from "./app.const";
