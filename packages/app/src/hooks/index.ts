@@ -10,6 +10,7 @@ export { useAllTasks } from "./use-all-tasks";
 export { useSearch } from "./use-search";
 export { useReminders } from "./use-reminders";
 export { useKeyboardShortcuts } from "./use-keyboard-shortcuts";
+export { useBlockNativeContextMenu } from "./use-block-context-menu";
 export { useMediaQuery } from "./use-media-query";
 export { useResizableSheetWidth } from "./use-resizable-sheet-width";
 export { useWindowInsets, useDragRegion } from "./use-window-chrome";

@@ -5,7 +5,11 @@ import { Toaster } from "@/components/ui/toaster.ui";
 import { ConfirmDestructiveDialog } from "@/components/ui/confirm-destructive-dialog.ui";
 import { useCommandStore } from "@/stores";
 import { useUiStore } from "@/stores/ui.store";
-import { useKeyboardShortcuts, useReminders } from "@/hooks";
+import {
+  useBlockNativeContextMenu,
+  useKeyboardShortcuts,
+  useReminders,
+} from "@/hooks";
 import { deleteTask } from "@/services";
 
 function DeleteTaskConfirm() {
@@ -34,6 +38,7 @@ function DeleteTaskConfirm() {
 function AppShell() {
   useReminders();
   useKeyboardShortcuts();
+  useBlockNativeContextMenu();
   return (
     <>
       <TodoScreen />
