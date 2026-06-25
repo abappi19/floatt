@@ -110,6 +110,10 @@ export function SidebarItemMenu({
           )}
           aria-label={label}
           onClick={(e) => e.stopPropagation()}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
         >
           <MoreHorizontal />
         </Button>
