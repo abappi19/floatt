@@ -113,7 +113,7 @@ export function SubgroupItem({
         {...attributes}
         {...listeners}
         className={cn(
-          "group relative flex w-full items-center gap-2 rounded-md pr-3 py-1.5 text-sm transition-colors",
+          "group relative flex w-full items-center gap-2 rounded-md text-sm transition-colors",
           isActive
             ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
             : "hover:bg-sidebar-accent/60",
