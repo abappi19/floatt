@@ -58,4 +58,8 @@ export const webPlatform: Platform = {
     async toggleMaximize() {},
     async close() {},
   },
+  menu: {
+    presentation: "dom",
+    async popup() {},
+  },
 };

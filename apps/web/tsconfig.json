@@ -1,10 +1,35 @@
 {
-  "extends": "@floatt/config/tsconfig/react.json",
+  "extends": "@floatt/config/tsconfig/base.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "jsx": "preserve",
+    "esModuleInterop": true,
+    "incremental": true,
     "paths": {
-      "@/*": ["../../packages/app/src/*"]
-    }
+      "@/*": [
+        "../../packages/app/src/*"
+      ]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "allowJs": true
   },
-  "include": ["src", "vite.config.ts"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "out",
+    ".next"
+  ]
 }

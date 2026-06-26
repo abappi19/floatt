@@ -2,7 +2,13 @@ import { create } from "zustand";
 import type { ListSelection } from "@/types";
 
 export type Theme = "light" | "dark";
-export type TaskSort = "default" | "due" | "importance" | "alpha";
+export type TaskSort =
+  | "manual"
+  | "importance"
+  | "alpha"
+  | "due"
+  | "created"
+  | "myday";
 
 const THEME_STORAGE_KEY = "floatt:theme";
 
@@ -35,10 +41,10 @@ export const useUiStore = create<UiStore>((set) => ({
   selectedTaskId: null,
   theme: readInitialTheme(),
   searchQuery: "",
-  taskSort: "default",
+  taskSort: "manual",
 
   selectList: (selectedList) =>
-    set({ selectedList, selectedTaskId: null, taskSort: "default" }),
+    set({ selectedList, selectedTaskId: null, taskSort: "manual" }),
   selectTask: (selectedTaskId) => set({ selectedTaskId }),
   setTheme: (theme) => set({ theme }),
   toggleTheme: () =>

@@ -1,0 +1,145 @@
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog.ui";
+import { Button } from "@/components/ui/button.ui";
+import { Input } from "@/components/ui/input.ui";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select.ui";
+import {
+  subgroupCreateFormSchema,
+  type SubgroupCreateForm,
+} from "@/schemas";
+import { useGroups } from "@/hooks";
+import { createSubgroup } from "@/services";
+
+const NO_GROUP = "__none__";
+
+interface NewListDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  defaultGroupId?: string | null;
+  onCreated?: (subgroupId: string) => void;
+}
+
+export function NewListDialog({
+  open,
+  onOpenChange,
+  defaultGroupId = null,
+  onCreated,
+}: NewListDialogProps) {
+  const groups = useGroups();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<SubgroupCreateForm>({
+    resolver: zodResolver(subgroupCreateFormSchema),
+    defaultValues: { name: "", groupId: defaultGroupId },
+  });
+
+  useEffect(() => {
+    if (open) {
+      reset({ name: "", groupId: defaultGroupId });
+    }
+  }, [open, defaultGroupId, reset]);
+
+  const onSubmit = async (values: SubgroupCreateForm) => {
+    const created = await createSubgroup({
+      name: values.name,
+      groupId: values.groupId ?? null,
+    });
+    onCreated?.(created.id);
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>New list</DialogTitle>
+          <DialogDescription>Create a list to organize tasks.</DialogDescription>
+        </DialogHeader>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-4"
+        >
+          <div className="flex flex-col gap-2">
+            <label htmlFor="list-name" className="text-sm font-medium">
+              Name
+            </label>
+            <Input
+              id="list-name"
+              autoFocus
+              placeholder="Untitled list"
+              aria-invalid={!!errors.name}
+              {...register("name")}
+            />
+            {errors.name ? (
+              <span className="text-xs text-destructive">
+                {errors.name.message}
+              </span>
+            ) : null}
+          </div>
+          {groups.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              <label htmlFor="list-group" className="text-sm font-medium">
+                Group
+              </label>
+              <Controller
+                control={control}
+                name="groupId"
+                render={({ field }) => (
+                  <Select
+                    value={field.value ?? NO_GROUP}
+                    onValueChange={(value) =>
+                      field.onChange(value === NO_GROUP ? null : value)
+                    }
+                  >
+                    <SelectTrigger id="list-group">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NO_GROUP}>No group</SelectItem>
+                      {groups.map((g) => (
+                        <SelectItem key={g.id} value={g.id}>
+                          {g.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+          ) : null}
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="ghost" size="sm">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button type="submit" size="sm" disabled={isSubmitting}>
+              Create
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

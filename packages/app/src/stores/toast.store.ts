@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { newId } from "@/utils/id";
+import { newId } from "@/utils/id.util";
 
 export interface Toast {
   id: string;
