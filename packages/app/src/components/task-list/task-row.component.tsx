@@ -6,6 +6,7 @@ import { formatDue, startOfDay } from "@/utils";
 import type { Task } from "@/types";
 import { useSubtasks, useSelectTask, useSelectedTaskId } from "@/hooks";
 import { setTaskCompleted, toggleTaskImportant } from "@/services";
+import { TaskContextMenu } from "./task-context-menu.component";
 
 interface TaskRowProps {
   task: Task;
@@ -55,6 +56,7 @@ export function TaskRow({ task }: TaskRowProps) {
   };
 
   return (
+    <TaskContextMenu task={task}>
     <div
       role="button"
       tabIndex={0}
@@ -151,5 +153,6 @@ export function TaskRow({ task }: TaskRowProps) {
         />
       </button>
     </div>
+    </TaskContextMenu>
   );
 }

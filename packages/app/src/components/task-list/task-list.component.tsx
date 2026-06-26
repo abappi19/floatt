@@ -7,6 +7,7 @@ import {
   Folder,
   FolderInput,
   FolderMinus,
+  GripVertical,
   Pencil,
   Star,
   Sun,
@@ -43,8 +44,10 @@ import { EmptyState } from "./empty-state.component";
 import { MyDaySuggestions } from "./my-day-suggestions.component";
 import { NewTaskInput } from "./new-task-input.component";
 import { TaskRow } from "./task-row.component";
+import { SortableTaskList } from "./sortable-task-list.component";
 
 function sortTasks(tasks: Task[], sort: TaskSort): Task[] {
+  if (sort === "manual") return tasks;
   const copy = [...tasks];
   if (sort === "alpha") {
     copy.sort((a, b) => a.title.localeCompare(b.title));
@@ -90,7 +93,26 @@ function TaskFlatList({ tasks }: { tasks: Task[] }) {
   );
 }
 
+function TaskSection({ title, tasks }: { title: string; tasks: Task[] }) {
+  if (tasks.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-1.5">
+      <h3 className="px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {title}
+      </h3>
+      <ul className="flex flex-col gap-1">
+        {tasks.map((t) => (
+          <li key={t.id}>
+            <TaskRow task={t} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 const SORT_OPTIONS: { value: TaskSort; label: string; icon: LucideIcon }[] = [
+  { value: "manual", label: "Manual", icon: GripVertical },
   { value: "importance", label: "Important", icon: Star },
   { value: "alpha", label: "Alphabetically", icon: ArrowDownAZ },
   { value: "due", label: "Due date", icon: Calendar },
@@ -123,7 +145,7 @@ function useSubgroupListBody(id: string, sort: TaskSort): ListBody {
     [tasks],
   );
   return {
-    pending: <TaskFlatList tasks={pending} />,
+    pending: <SortableTaskList tasks={pending} />,
     completed,
     isEmpty: pending.length === 0 && completed.length === 0,
   };
@@ -154,10 +176,19 @@ function usePlannedListBody(sort: TaskSort): ListBody {
     buckets.thisWeek.length +
     buckets.later.length;
 
-  const content = useMemo(
-    () => <TaskFlatList tasks={sortTasks(flattenPlanned(buckets), sort)} />,
-    [buckets, sort],
-  );
+  const content = useMemo(() => {
+    if (sort === "manual") {
+      return (
+        <div className="flex flex-col gap-5">
+          <TaskSection title="Today" tasks={buckets.today} />
+          <TaskSection title="Tomorrow" tasks={buckets.tomorrow} />
+          <TaskSection title="This week" tasks={buckets.thisWeek} />
+          <TaskSection title="Later" tasks={buckets.later} />
+        </div>
+      );
+    }
+    return <TaskFlatList tasks={sortTasks(flattenPlanned(buckets), sort)} />;
+  }, [buckets, sort]);
 
   return {
     pending: content,

@@ -21,6 +21,7 @@ function toTransform(
 }
 import type { Task } from "@/types";
 import { reorderTasks } from "@/services";
+import { useSetTaskSort } from "@/hooks";
 import { TaskRow } from "./task-row.component";
 
 function SortableTask({ task }: { task: Task }) {
@@ -39,6 +40,7 @@ function SortableTask({ task }: { task: Task }) {
 }
 
 export function SortableTaskList({ tasks }: { tasks: Task[] }) {
+  const setTaskSort = useSetTaskSort();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
@@ -51,6 +53,8 @@ export function SortableTaskList({ tasks }: { tasks: Task[] }) {
     const to = ids.indexOf(over.id as string);
     if (from < 0 || to < 0) return;
     void reorderTasks(arrayMove(ids, from, to));
+    // The dropped order only persists as manual sortOrder, so reflect that.
+    setTaskSort("manual");
   };
 
   if (tasks.length === 0) return null;
