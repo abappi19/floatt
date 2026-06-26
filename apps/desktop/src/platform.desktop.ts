@@ -9,6 +9,7 @@ import { openUrl as tauriOpenUrl } from "@tauri-apps/plugin-opener";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   Menu,
+  Submenu,
   type IconMenuItemOptions,
   type MenuItemOptions,
   type PredefinedMenuItemOptions,
@@ -23,11 +24,12 @@ import type {
 } from "@floatt/app/platform";
 import { hashToInt32 } from "@floatt/app/utils";
 
-type NativeMenuItemOptions =
+type NativeMenuItem =
   | MenuItemOptions
   | IconMenuItemOptions
   | SubmenuOptions
-  | PredefinedMenuItemOptions;
+  | PredefinedMenuItemOptions
+  | Submenu;
 
 function loadImageElement(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -68,14 +70,26 @@ async function svgToNativeImage(svg: string): Promise<Image | undefined> {
 
 async function toNativeMenuItem(
   item: PlatformMenuItem,
-): Promise<NativeMenuItemOptions> {
+): Promise<NativeMenuItem> {
   if (item.kind === "separator") return { item: "Separator" };
   if (item.kind === "submenu") {
-    return {
+    // A submenu icon can't ride along in the options blob — Tauri then parses
+    // the item as a leaf icon item and drops `items`. Build the submenu, then
+    // attach the icon via setIcon().
+    const submenu = await Submenu.new({
       text: item.label,
       enabled: item.disabled !== true,
       items: await Promise.all(item.items.map(toNativeMenuItem)),
-    };
+    });
+    if (item.icon) {
+      try {
+        const icon = await svgToNativeImage(item.icon);
+        if (icon) await submenu.setIcon(icon);
+      } catch {
+        // keep the submenu even if the icon can't be attached
+      }
+    }
+    return submenu;
   }
   return {
     text: item.label,
