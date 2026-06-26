@@ -78,7 +78,7 @@ export function TaskRow({ task }: TaskRowProps) {
         onCheckedChange={handleToggle}
         onClick={(e) => e.stopPropagation()}
         aria-label={isCompleted ? "Mark as not completed" : "Mark as completed"}
-        className="mt-0.5"
+        className="mt-0.5 size-4"
       />
 
       <div className="flex min-w-0 flex-1 flex-col gap-1">

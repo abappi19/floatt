@@ -1,5 +1,8 @@
 import { MoreHorizontal } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { createElement } from "react";
 import type { ComponentType, ReactElement, ReactNode } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { Button } from "@/components/ui/button.ui";
 import {
   DropdownMenu,
@@ -23,6 +26,7 @@ import {
 } from "@/components/ui/context-menu.ui";
 import { cn } from "@/utils/cn.util";
 import { usePlatform } from "@/providers";
+import type { PlatformMenuItem } from "@/platform";
 
 export type SidebarMenuAction =
   | {
@@ -31,9 +35,15 @@ export type SidebarMenuAction =
       onSelect: () => void;
       variant?: "default" | "destructive";
       disabled?: boolean;
+      icon?: LucideIcon;
     }
   | { kind: "separator" }
-  | { kind: "submenu"; label: string; items: SidebarMenuAction[] };
+  | {
+      kind: "submenu";
+      label: string;
+      items: SidebarMenuAction[];
+      icon?: LucideIcon;
+    };
 
 interface MenuFamily {
   Item: ComponentType<{
@@ -70,7 +80,10 @@ function renderActions(actions: SidebarMenuAction[], f: MenuFamily): ReactNode {
     if (action.kind === "submenu") {
       return (
         <f.Sub key={i}>
-          <f.SubTrigger>{action.label}</f.SubTrigger>
+          <f.SubTrigger>
+            {action.icon ? <action.icon /> : null}
+            {action.label}
+          </f.SubTrigger>
           <f.SubContent>{renderActions(action.items, f)}</f.SubContent>
         </f.Sub>
       );
@@ -82,9 +95,37 @@ function renderActions(actions: SidebarMenuAction[], f: MenuFamily): ReactNode {
         disabled={action.disabled}
         onSelect={action.onSelect}
       >
+        {action.icon ? <action.icon /> : null}
         {action.label}
       </f.Item>
     );
+  });
+}
+
+function iconToSvg(Icon?: LucideIcon): string | undefined {
+  if (!Icon) return undefined;
+  return renderToStaticMarkup(createElement(Icon, { size: 16 }));
+}
+
+/** Map the React-flavored actions onto the serializable shape the native menu consumes. */
+function toPlatformItems(actions: SidebarMenuAction[]): PlatformMenuItem[] {
+  return actions.map((action) => {
+    if (action.kind === "separator") return { kind: "separator" };
+    if (action.kind === "submenu") {
+      return {
+        kind: "submenu",
+        label: action.label,
+        icon: iconToSvg(action.icon),
+        items: toPlatformItems(action.items),
+      };
+    }
+    return {
+      kind: "item",
+      label: action.label,
+      onSelect: action.onSelect,
+      disabled: action.disabled,
+      icon: iconToSvg(action.icon),
+    };
   });
 }
 
@@ -114,7 +155,10 @@ export function SidebarItemMenu({
         onClick={(e) => {
           e.stopPropagation();
           const rect = e.currentTarget.getBoundingClientRect();
-          void menu.popup(actions, { x: rect.left, y: rect.bottom });
+          void menu.popup(toPlatformItems(actions), {
+            x: rect.left,
+            y: rect.bottom,
+          });
         }}
         onContextMenu={(e) => {
           e.preventDefault();

@@ -39,13 +39,21 @@ export interface PlatformWindow {
 export type MenuPresentation = "dom" | "native";
 
 export type PlatformMenuItem =
-  | { kind: "item"; label: string; onSelect: () => void; disabled?: boolean }
+  | {
+      kind: "item";
+      label: string;
+      onSelect: () => void;
+      disabled?: boolean;
+      /** SVG markup for the item's leading icon, rasterized into a native image. */
+      icon?: string;
+    }
   | { kind: "separator" }
   | {
       kind: "submenu";
       label: string;
       items: PlatformMenuItem[];
       disabled?: boolean;
+      icon?: string;
     };
 
 export interface PlatformMenu {

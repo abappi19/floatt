@@ -1,4 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ArrowUpDown,
+  Folder,
+  FolderInput,
+  FolderMinus,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area.ui";
 import { ConfirmDestructiveDialog } from "@/components/ui/confirm-destructive-dialog.ui";
 import {
@@ -274,6 +282,7 @@ function useListOptions(selection: ListSelection) {
   const sortAction: SidebarMenuAction = {
     kind: "submenu",
     label: "Sort",
+    icon: ArrowUpDown,
     items: (Object.keys(SORT_LABEL) as TaskSort[]).map((s) => ({
       kind: "item",
       label: (sort === s ? "✓ " : "") + SORT_LABEL[s],
@@ -283,35 +292,39 @@ function useListOptions(selection: ListSelection) {
 
   const actions: SidebarMenuAction[] = subgroup
     ? [
-        { kind: "item", label: "Rename list", onSelect: startRename },
-        {
-          kind: "submenu",
-          label: "Move to group",
-          items: [
-            {
-              kind: "item",
-              label: "No group",
-              disabled: subgroup.groupId === null,
-              onSelect: () => moveSubgroup(subgroup.id, null),
-            },
-            ...(groups.length > 0 ? [{ kind: "separator" as const }] : []),
-            ...groups.map<SidebarMenuAction>((g) => ({
-              kind: "item",
-              label: g.name,
-              disabled: g.id === subgroup.groupId,
-              onSelect: () => moveSubgroup(subgroup.id, g.id),
-            })),
-          ],
-        },
-        sortAction,
-        { kind: "separator" },
-        {
-          kind: "item",
-          label: "Delete list",
-          variant: "destructive",
-          onSelect: () => setConfirmDelete(true),
-        },
-      ]
+      { kind: "item", label: "Rename list", icon: Pencil, onSelect: startRename },
+      {
+        kind: "submenu",
+        label: "Move to group",
+        icon: FolderInput,
+        items: [
+          {
+            kind: "item",
+            label: "No group",
+            icon: FolderMinus,
+            disabled: subgroup.groupId === null,
+            onSelect: () => moveSubgroup(subgroup.id, null),
+          },
+          ...(groups.length > 0 ? [{ kind: "separator" as const }] : []),
+          ...groups.map<SidebarMenuAction>((g) => ({
+            kind: "item",
+            label: g.name,
+            icon: Folder,
+            disabled: g.id === subgroup.groupId,
+            onSelect: () => moveSubgroup(subgroup.id, g.id),
+          })),
+        ],
+      },
+      sortAction,
+      { kind: "separator" },
+      {
+        kind: "item",
+        label: "Delete list",
+        icon: Trash2,
+        variant: "destructive",
+        onSelect: () => setConfirmDelete(true),
+      },
+    ]
     : [sortAction];
 
   return {
@@ -343,29 +356,33 @@ export function TaskList() {
   return (
     <div className="flex h-full flex-col">
       <header style={{ paddingTop: insets.top || undefined }} className="px-6">
-        <div className="flex items-center gap-3 pb-3 pt-5">
-          {options.isRenaming && options.subgroup ? (
-            <input
-              ref={options.renameInputRef}
-              value={options.draftName}
-              onChange={(e) => options.setDraftName(e.target.value)}
-              onBlur={options.commitRename}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  options.commitRename();
-                } else if (e.key === "Escape") {
-                  e.preventDefault();
-                  options.cancelRename();
-                }
-              }}
-              className="min-w-0 flex-1 rounded-md border border-input bg-background px-2 py-1 text-2xl font-bold tracking-tight outline-none focus-visible:ring-[2px] focus-visible:ring-ring/50"
-            />
-          ) : (
-            <h1 className="min-w-0 flex-1 truncate text-2xl font-bold tracking-tight">
-              {title}
-            </h1>
-          )}
+        <div className="flex items-center gap-3">
+          {
+            options.isRenaming && options.subgroup
+              ? (
+                <input
+                  ref={options.renameInputRef}
+                  value={options.draftName}
+                  onChange={(e) => options.setDraftName(e.target.value)}
+                  onBlur={options.commitRename}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      options.commitRename();
+                    } else if (e.key === "Escape") {
+                      e.preventDefault();
+                      options.cancelRename();
+                    }
+                  }}
+                  className="min-w-0 flex-1 rounded-md border border-input bg-background px-2 py-1 text-2xl font-bold tracking-tight outline-none focus-visible:ring-[2px] focus-visible:ring-ring/50"
+                />
+              )
+              : (
+                <h1 className="min-w-0 flex-1 truncate text-2xl font-bold tracking-tight">
+                  {title}
+                </h1>
+              )
+          }
           <SidebarItemMenu
             actions={options.actions}
             label={`${title} options`}

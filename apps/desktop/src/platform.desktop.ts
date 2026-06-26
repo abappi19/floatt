@@ -9,10 +9,12 @@ import { openUrl as tauriOpenUrl } from "@tauri-apps/plugin-opener";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   Menu,
+  type IconMenuItemOptions,
   type MenuItemOptions,
   type PredefinedMenuItemOptions,
   type SubmenuOptions,
 } from "@tauri-apps/api/menu";
+import { Image } from "@tauri-apps/api/image";
 import { LogicalPosition } from "@tauri-apps/api/dpi";
 import type {
   PermissionState,
@@ -23,21 +25,67 @@ import { hashToInt32 } from "@floatt/app/utils";
 
 type NativeMenuItemOptions =
   | MenuItemOptions
+  | IconMenuItemOptions
   | SubmenuOptions
   | PredefinedMenuItemOptions;
 
-function toNativeMenuItem(item: PlatformMenuItem): NativeMenuItemOptions {
+function loadImageElement(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = document.createElement("img");
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("icon decode failed"));
+    img.src = src;
+  });
+}
+
+function canvasToPng(canvas: HTMLCanvasElement): Promise<Uint8Array> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(async (blob) => {
+      if (!blob) return reject(new Error("icon encode failed"));
+      resolve(new Uint8Array(await blob.arrayBuffer()));
+    }, "image/png");
+  });
+}
+
+/**
+ * Rasterize a lucide SVG into a native menu image. lucide draws with
+ * `currentColor`, which resolves to black in a standalone SVG, so we inject the
+ * app's foreground color to keep icons legible against the current OS theme.
+ */
+async function svgToNativeImage(svg: string): Promise<Image | undefined> {
+  try {
+    const color = getComputedStyle(document.body).color || "#000";
+    const colored = svg.replace(/currentColor/g, color);
+    const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(colored)}`;
+    const el = await loadImageElement(url);
+    const size = 32; // 16pt @2x for crisp icons on retina displays
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return undefined;
+    ctx.drawImage(el, 0, 0, size, size);
+    return await Image.fromBytes(await canvasToPng(canvas));
+  } catch {
+    return undefined;
+  }
+}
+
+async function toNativeMenuItem(
+  item: PlatformMenuItem,
+): Promise<NativeMenuItemOptions> {
   if (item.kind === "separator") return { item: "Separator" };
   if (item.kind === "submenu") {
     return {
       text: item.label,
       enabled: item.disabled !== true,
-      items: item.items.map(toNativeMenuItem),
+      items: await Promise.all(item.items.map(toNativeMenuItem)),
     };
   }
   return {
     text: item.label,
     enabled: item.disabled !== true,
+    icon: item.icon ? await svgToNativeImage(item.icon) : undefined,
     action: () => item.onSelect(),
   };
 }
@@ -109,7 +157,9 @@ export const desktopPlatform: Platform = {
   menu: {
     presentation: "native",
     async popup(items, at) {
-      const menu = await Menu.new({ items: items.map(toNativeMenuItem) });
+      const menu = await Menu.new({
+        items: await Promise.all(items.map(toNativeMenuItem)),
+      });
       await menu.popup(at ? new LogicalPosition(at.x, at.y) : undefined);
     },
   },

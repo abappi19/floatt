@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronRight, Folder } from "lucide-react";
+import { ChevronRight, Folder, Pencil, Trash2 } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import type { Group } from "@/types";
 import { cn } from "@/utils/cn.util";
@@ -85,11 +85,12 @@ export function GroupItem({ group }: GroupItemProps) {
   };
 
   const actions: SidebarMenuAction[] = [
-    { kind: "item", label: "Rename", onSelect: startRename },
+    { kind: "item", label: "Rename", icon: Pencil, onSelect: startRename },
     { kind: "separator" },
     {
       kind: "item",
       label: "Delete group",
+      icon: Trash2,
       variant: "destructive",
       onSelect: () => setConfirmDelete(true),
     },
