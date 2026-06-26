@@ -77,17 +77,22 @@ export function NewTaskInput({ selection }: NewTaskInputProps) {
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "flex items-center gap-3 rounded-md border bg-card px-3 py-2.5 shadow-xs transition-colors",
-        isFocused && "border-ring ring-[2px] ring-ring/40",
-        disabled && "opacity-60",
+        "flex items-center gap-3 rounded-lg border bg-card px-3.5 py-3 shadow-xs transition-all",
+        "hover:border-ring/60",
+        isFocused && "border-ring ring-[3px] ring-ring/25",
+        disabled && "opacity-60 hover:border-border",
       )}
     >
-      <Plus
+      <span
         className={cn(
-          "size-4 shrink-0 text-muted-foreground",
-          isFocused && "text-primary",
+          "flex size-5 shrink-0 items-center justify-center rounded-full transition-colors",
+          isFocused
+            ? "bg-primary text-primary-foreground"
+            : "text-primary",
         )}
-      />
+      >
+        <Plus className="size-4" />
+      </span>
       <input
         ref={inputRef}
         value={title}
@@ -98,12 +103,12 @@ export function NewTaskInput({ selection }: NewTaskInputProps) {
           disabled ? "Create a list first to add tasks" : placeholder
         }
         disabled={disabled}
-        className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+        className="flex-1 bg-transparent text-sm font-medium outline-none placeholder:font-normal placeholder:text-muted-foreground disabled:cursor-not-allowed"
       />
       {title.trim() ? (
         <button
           type="submit"
-          className="rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+          className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary/90"
         >
           Add
         </button>

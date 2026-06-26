@@ -1,22 +1,19 @@
-import { useMemo } from "react";
-import { ArrowDownAZ, ArrowUpDown, Bookmark, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button.ui";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area.ui";
+import { ConfirmDestructiveDialog } from "@/components/ui/confirm-destructive-dialog.ui";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu.ui";
+  SidebarItemMenu,
+  type SidebarMenuAction,
+} from "@/components/sidebar/sidebar-item-menu.component";
 import { SMART_LISTS } from "@/consts";
 import type { ListSelection, Task } from "@/types";
 import {
   useAllTasks,
+  useGroups,
   useImportantTasks,
   useMyDay,
   usePlannedTasks,
+  useSelectList,
   useSelectedList,
   useSetTaskSort,
   useSubgroups,
@@ -24,6 +21,7 @@ import {
   useTasks,
   useWindowInsets,
 } from "@/hooks";
+import { deleteSubgroup, moveSubgroup, renameSubgroup } from "@/services";
 import type { TaskSort } from "@/stores/ui.store";
 import type { PlannedBuckets } from "@/queries";
 import { CompletedAccordion } from "./completed-accordion.component";
@@ -95,42 +93,6 @@ const SORT_LABEL: Record<TaskSort, string> = {
   importance: "Importance",
   alpha: "Alphabetical",
 };
-
-function SortMenu() {
-  const sort = useTaskSort();
-  const setSort = useSetTaskSort();
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-1.5">
-          <ArrowUpDown />
-          <span className="text-xs">{SORT_LABEL[sort]}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => setSort("default")}>
-          <ArrowUpDown />
-          Default
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setSort("due")}>
-          <Calendar />
-          Due date
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setSort("importance")}>
-          <Bookmark />
-          Importance
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setSort("alpha")}>
-          <ArrowDownAZ />
-          Alphabetical
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
 
 function useListTitle(selection: ListSelection): string {
   const subgroups = useSubgroups();
@@ -262,32 +224,113 @@ function PlannedBody({ sort }: { sort: TaskSort }) {
   return <div className="flex flex-col gap-3">{body.pending}</div>;
 }
 
-function HeaderCount({ selection }: { selection: ListSelection }) {
-  const myDay = useMyDay();
-  const important = useImportantTasks();
-  const planned = usePlannedTasks();
-  const all = useAllTasks();
-  const subTasks = useTasks(
-    selection.kind === "subgroup" ? selection.id : null,
-  );
+function useListOptions(selection: ListSelection) {
+  const sort = useTaskSort();
+  const setSort = useSetTaskSort();
+  const subgroups = useSubgroups();
+  const groups = useGroups();
+  const selectList = useSelectList();
 
-  let count = 0;
-  if (selection.kind === "subgroup") {
-    count = subTasks.filter((t) => t.isCompleted === 0).length;
-  } else if (selection.id === "my-day") count = myDay.length;
-  else if (selection.id === "important") count = important.length;
-  else if (selection.id === "planned")
-    count =
-      planned.today.length +
-      planned.tomorrow.length +
-      planned.thisWeek.length +
-      planned.later.length;
-  else count = all.length;
+  const subgroup =
+    selection.kind === "subgroup"
+      ? subgroups.find((s) => s.id === selection.id)
+      : undefined;
 
-  if (count === 0) return null;
-  return (
-    <span className="text-xs text-muted-foreground tabular-nums">{count}</span>
-  );
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [draftName, setDraftName] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const renameInputRef = useRef<HTMLInputElement>(null);
+
+  const selectionKey = selection.id;
+  useEffect(() => {
+    setIsRenaming(false);
+  }, [selection.kind, selectionKey]);
+
+  useEffect(() => {
+    if (isRenaming) {
+      renameInputRef.current?.focus();
+      renameInputRef.current?.select();
+    }
+  }, [isRenaming]);
+
+  const startRename = () => {
+    if (!subgroup) return;
+    setDraftName(subgroup.name);
+    setIsRenaming(true);
+  };
+
+  const commitRename = async () => {
+    if (!subgroup) {
+      setIsRenaming(false);
+      return;
+    }
+    const trimmed = draftName.trim();
+    if (trimmed && trimmed !== subgroup.name) {
+      await renameSubgroup(subgroup.id, trimmed);
+    }
+    setIsRenaming(false);
+  };
+
+  const sortAction: SidebarMenuAction = {
+    kind: "submenu",
+    label: "Sort",
+    items: (Object.keys(SORT_LABEL) as TaskSort[]).map((s) => ({
+      kind: "item",
+      label: (sort === s ? "✓ " : "") + SORT_LABEL[s],
+      onSelect: () => setSort(s),
+    })),
+  };
+
+  const actions: SidebarMenuAction[] = subgroup
+    ? [
+        { kind: "item", label: "Rename list", onSelect: startRename },
+        {
+          kind: "submenu",
+          label: "Move to group",
+          items: [
+            {
+              kind: "item",
+              label: "No group",
+              disabled: subgroup.groupId === null,
+              onSelect: () => moveSubgroup(subgroup.id, null),
+            },
+            ...(groups.length > 0 ? [{ kind: "separator" as const }] : []),
+            ...groups.map<SidebarMenuAction>((g) => ({
+              kind: "item",
+              label: g.name,
+              disabled: g.id === subgroup.groupId,
+              onSelect: () => moveSubgroup(subgroup.id, g.id),
+            })),
+          ],
+        },
+        sortAction,
+        { kind: "separator" },
+        {
+          kind: "item",
+          label: "Delete list",
+          variant: "destructive",
+          onSelect: () => setConfirmDelete(true),
+        },
+      ]
+    : [sortAction];
+
+  return {
+    subgroup,
+    actions,
+    isRenaming,
+    draftName,
+    setDraftName,
+    renameInputRef,
+    commitRename,
+    cancelRename: () => setIsRenaming(false),
+    confirmDelete,
+    setConfirmDelete,
+    deleteList: () => {
+      if (!subgroup) return;
+      deleteSubgroup(subgroup.id);
+      selectList({ kind: "smart", id: "my-day" });
+    },
+  };
 }
 
 export function TaskList() {
@@ -295,17 +338,39 @@ export function TaskList() {
   const sort = useTaskSort();
   const title = useListTitle(selection);
   const insets = useWindowInsets();
+  const options = useListOptions(selection);
 
   return (
     <div className="flex h-full flex-col">
-      <header
-        style={{ paddingTop: insets.top || undefined }}
-        className="flex min-h-10 items-center gap-3 border-b px-4"
-      >
-        <span className="font-semibold">{title}</span>
-        <HeaderCount selection={selection} />
-        <div className="ml-auto">
-          <SortMenu />
+      <header style={{ paddingTop: insets.top || undefined }} className="px-6">
+        <div className="flex items-center gap-3 pb-3 pt-5">
+          {options.isRenaming && options.subgroup ? (
+            <input
+              ref={options.renameInputRef}
+              value={options.draftName}
+              onChange={(e) => options.setDraftName(e.target.value)}
+              onBlur={options.commitRename}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  options.commitRename();
+                } else if (e.key === "Escape") {
+                  e.preventDefault();
+                  options.cancelRename();
+                }
+              }}
+              className="min-w-0 flex-1 rounded-md border border-input bg-background px-2 py-1 text-2xl font-bold tracking-tight outline-none focus-visible:ring-[2px] focus-visible:ring-ring/50"
+            />
+          ) : (
+            <h1 className="min-w-0 flex-1 truncate text-2xl font-bold tracking-tight">
+              {title}
+            </h1>
+          )}
+          <SidebarItemMenu
+            actions={options.actions}
+            label={`${title} options`}
+            className="bg-muted text-muted-foreground opacity-100 hover:bg-muted/80 hover:text-foreground"
+          />
         </div>
       </header>
 
@@ -321,6 +386,18 @@ export function TaskList() {
       <div className="border-t p-3">
         <NewTaskInput selection={selection} />
       </div>
+
+      <ConfirmDestructiveDialog
+        open={options.confirmDelete}
+        onOpenChange={options.setConfirmDelete}
+        title={
+          options.subgroup
+            ? `Delete "${options.subgroup.name}"?`
+            : "Delete list?"
+        }
+        description="This permanently deletes the list and all its tasks."
+        onConfirm={options.deleteList}
+      />
     </div>
   );
 }

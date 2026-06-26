@@ -22,6 +22,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu.ui";
 import { cn } from "@/utils/cn.util";
+import { usePlatform } from "@/providers";
 
 export type SidebarMenuAction =
   | {
@@ -98,6 +99,33 @@ export function SidebarItemMenu({
   label = "Options",
   className,
 }: SidebarItemMenuProps) {
+  const { menu } = usePlatform();
+
+  if (menu.presentation === "native") {
+    return (
+      <Button
+        variant="ghost"
+        size="icon-xs"
+        className={cn(
+          "opacity-0 transition-opacity group-hover:opacity-100",
+          className,
+        )}
+        aria-label={label}
+        onClick={(e) => {
+          e.stopPropagation();
+          const rect = e.currentTarget.getBoundingClientRect();
+          void menu.popup(actions, { x: rect.left, y: rect.bottom });
+        }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
+        <MoreHorizontal />
+      </Button>
+    );
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

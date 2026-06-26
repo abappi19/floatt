@@ -31,7 +31,8 @@ export function TodoScreen() {
   const selectedTaskId = useSelectedTaskId();
   const selectTask = useSelectTask();
 
-  const detailOpen = isNarrow && selectedTaskId !== null;
+  const detailSheetOpen = isNarrow && selectedTaskId !== null;
+  const showDetailPanel = !isNarrow && selectedTaskId !== null;
   const { width: sheetWidth, dragging, onPointerDown } = useResizableSheetWidth();
 
   return (
@@ -41,6 +42,8 @@ export function TodoScreen() {
         autoSaveId={isNarrow ? "floatt:layout-narrow" : "floatt:layout"}
       >
         <ResizablePanel
+          id="sidebar"
+          order={1}
           defaultSize={isNarrow ? 30 : 20}
           minSize={isNarrow ? 20 : 14}
           maxSize={isNarrow ? 50 : 35}
@@ -50,16 +53,27 @@ export function TodoScreen() {
 
         <ResizableHandle />
 
-        <ResizablePanel defaultSize={isNarrow ? 70 : 55} minSize={30}>
-          <section className="flex h-full flex-col border-r">
+        <ResizablePanel
+          id="main"
+          order={2}
+          defaultSize={isNarrow ? 70 : showDetailPanel ? 55 : 80}
+          minSize={30}
+        >
+          <section className="flex h-full flex-col">
             {searching ? <SearchResults /> : <TaskList />}
           </section>
         </ResizablePanel>
 
-        {!isNarrow && (
+        {showDetailPanel && (
           <>
             <ResizableHandle />
-            <ResizablePanel defaultSize={25} minSize={18} maxSize={45}>
+            <ResizablePanel
+              id="detail"
+              order={3}
+              defaultSize={25}
+              minSize={18}
+              maxSize={45}
+            >
               <TaskDetail />
             </ResizablePanel>
           </>
@@ -67,7 +81,7 @@ export function TodoScreen() {
       </ResizablePanelGroup>
 
       <Sheet
-        open={detailOpen}
+        open={detailSheetOpen}
         onOpenChange={(open) => {
           if (!open) selectTask(null);
         }}

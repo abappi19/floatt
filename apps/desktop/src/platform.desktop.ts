@@ -7,8 +7,40 @@ import {
 } from "@tauri-apps/plugin-notification";
 import { openUrl as tauriOpenUrl } from "@tauri-apps/plugin-opener";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import type { PermissionState, Platform } from "@floatt/app/platform";
+import {
+  Menu,
+  type MenuItemOptions,
+  type PredefinedMenuItemOptions,
+  type SubmenuOptions,
+} from "@tauri-apps/api/menu";
+import { LogicalPosition } from "@tauri-apps/api/dpi";
+import type {
+  PermissionState,
+  Platform,
+  PlatformMenuItem,
+} from "@floatt/app/platform";
 import { hashToInt32 } from "@floatt/app/utils";
+
+type NativeMenuItemOptions =
+  | MenuItemOptions
+  | SubmenuOptions
+  | PredefinedMenuItemOptions;
+
+function toNativeMenuItem(item: PlatformMenuItem): NativeMenuItemOptions {
+  if (item.kind === "separator") return { item: "Separator" };
+  if (item.kind === "submenu") {
+    return {
+      text: item.label,
+      enabled: item.disabled !== true,
+      items: item.items.map(toNativeMenuItem),
+    };
+  }
+  return {
+    text: item.label,
+    enabled: item.disabled !== true,
+    action: () => item.onSelect(),
+  };
+}
 
 const isMac =
   typeof navigator !== "undefined" && /Mac/i.test(navigator.userAgent);
@@ -72,6 +104,13 @@ export const desktopPlatform: Platform = {
     },
     async close() {
       await getCurrentWindow().close();
+    },
+  },
+  menu: {
+    presentation: "native",
+    async popup(items, at) {
+      const menu = await Menu.new({ items: items.map(toNativeMenuItem) });
+      await menu.popup(at ? new LogicalPosition(at.x, at.y) : undefined);
     },
   },
 };
