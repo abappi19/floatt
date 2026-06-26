@@ -35,8 +35,37 @@ export interface PlatformWindow {
   close(): Promise<void>;
 }
 
+/** How list/context menus should be rendered on this platform. */
+export type MenuPresentation = "dom" | "native";
+
+export type PlatformMenuItem =
+  | {
+      kind: "item";
+      label: string;
+      onSelect: () => void;
+      disabled?: boolean;
+      /** SVG markup for the item's leading icon, rasterized into a native image. */
+      icon?: string;
+    }
+  | { kind: "separator" }
+  | {
+      kind: "submenu";
+      label: string;
+      items: PlatformMenuItem[];
+      disabled?: boolean;
+      icon?: string;
+    };
+
+export interface PlatformMenu {
+  /** "dom" = render the in-app Radix menu; "native" = pop a real OS menu via popup(). */
+  presentation: MenuPresentation;
+  /** Show a native menu at a window-relative point. No-op when presentation is "dom". */
+  popup(items: PlatformMenuItem[], at?: { x: number; y: number }): Promise<void>;
+}
+
 export interface Platform {
   notifications: PlatformNotifications;
   opener: PlatformOpener;
   window: PlatformWindow;
+  menu: PlatformMenu;
 }

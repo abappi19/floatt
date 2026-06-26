@@ -3,3 +3,4 @@ export type { Theme } from "./ui.store";
 export { useToastStore, toast } from "./toast.store";
 export type { Toast } from "./toast.store";
 export { useCommandStore } from "./command.store";
+export { useListThemeStore } from "./theme.store";

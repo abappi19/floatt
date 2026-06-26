@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ListTodo } from "lucide-react";
+import {
+  Folder,
+  FolderInput,
+  FolderMinus,
+  ListTodo,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import type { Group, Subgroup } from "@/types";
 import { cn } from "@/utils/cn.util";
@@ -103,14 +110,16 @@ export function SubgroupItem({
   };
 
   const actions: SidebarMenuAction[] = [
-    { kind: "item", label: "Rename", onSelect: startRename },
+    { kind: "item", label: "Rename", icon: Pencil, onSelect: startRename },
     {
       kind: "submenu",
       label: "Move to group",
+      icon: FolderInput,
       items: [
         {
           kind: "item",
           label: "No group",
+          icon: FolderMinus,
           disabled: subgroup.groupId === null,
           onSelect: () => moveSubgroup(subgroup.id, null),
         },
@@ -120,6 +129,7 @@ export function SubgroupItem({
         ...groups.map<SidebarMenuAction>((g) => ({
           kind: "item",
           label: g.name,
+          icon: Folder,
           disabled: g.id === subgroup.groupId,
           onSelect: () => moveSubgroup(subgroup.id, g.id),
         })),
@@ -129,6 +139,7 @@ export function SubgroupItem({
     {
       kind: "item",
       label: "Delete list",
+      icon: Trash2,
       variant: "destructive",
       onSelect: () => setConfirmDelete(true),
     },

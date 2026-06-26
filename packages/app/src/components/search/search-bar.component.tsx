@@ -28,7 +28,7 @@ export function SearchBar(props: {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search"
-          className="h-6 p-2 pl-8 pr-8 bg-gray-200"
+          className="h-6 p-2 pl-8 pr-8 bg-muted"
         />
         {query ? (
           <Button

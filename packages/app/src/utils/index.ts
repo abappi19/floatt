@@ -1,4 +1,5 @@
 export { cn } from "./cn.util";
+export { assetSrc } from "./asset.util";
 export { newId } from "./id.util";
 export { formatDue, isToday, relativeDue, startOfDay, todayIsoDate } from "./date.util";
 export { nextOccurrence } from "./repeat.util";

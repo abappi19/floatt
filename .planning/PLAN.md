@@ -5,3 +5,4 @@ Local-first task manager (web + Tauri) sharing one React codebase in `packages/a
 | Initiative | Status | Plan |
 | --- | --- | --- |
 | Naming convention migration | done | [naming-convention-migration/PLAN.md](naming-convention-migration/PLAN.md) |
+| List themes | done | [list-themes/PLAN.md](list-themes/PLAN.md) |

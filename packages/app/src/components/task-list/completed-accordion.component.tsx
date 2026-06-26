@@ -9,7 +9,7 @@ interface CompletedAccordionProps {
 }
 
 export function CompletedAccordion({ tasks }: CompletedAccordionProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const sorted = useMemo(() => {
     return [...tasks].sort((a, b) => {
@@ -35,8 +35,10 @@ export function CompletedAccordion({ tasks }: CompletedAccordionProps) {
             !isOpen && "-rotate-90",
           )}
         />
-        <span>Completed</span>
-        <span className="tabular-nums">{tasks.length}</span>
+        <div className="px-1 flex gap-2 rounded-sm bg-muted">
+          <span>Completed</span>
+          {/* <span className="tabular-nums">{tasks.length}</span> */}
+        </div>
       </button>
 
       <div
