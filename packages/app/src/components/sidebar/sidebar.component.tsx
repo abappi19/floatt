@@ -19,9 +19,10 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { Button } from "@/components/ui/button.ui";
 import { Separator } from "@/components/ui/separator.ui";
 import { ScrollArea } from "@/components/ui/scroll-area.ui";
-import { APP_NAME } from "@/consts";
+import { APP_NAME, SORT_ORDER_STEP } from "@/consts";
 import { useGroups, useSubgroups, useWindowInsets } from "@/hooks";
 import { moveSubgroupToGroup, reorderGroups } from "@/services";
+import type { Group, Subgroup } from "@/types";
 import { SearchBar } from "@/components/search/search-bar.component";
 import { ThemeToggle } from "@/components/theme/theme-toggle.component";
 import { SmartListSection } from "./smart-list-section.component";
@@ -45,6 +46,17 @@ const measuring = {
   droppable: { strategy: MeasuringStrategy.Always },
 };
 
+/** Stable signature of a flat tree's order + parenting, for optimistic reconciliation. */
+function orderSignature(items: FlatItem[]): string {
+  return items.map((i) => `${i.id}:${i.parentId ?? "root"}`).join("|");
+}
+
+interface OptimisticTree {
+  groups: Group[];
+  subgroups: Subgroup[];
+  signature: string;
+}
+
 export function Sidebar() {
   const groups = useGroups();
   const subgroups = useSubgroups();
@@ -62,10 +74,31 @@ export function Sidebar() {
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
   const [offsetLeft, setOffsetLeft] = useState(0);
 
+  // Reorder is persisted async via Dexie; liveQuery only reflects it a tick
+  // later. We render this optimistic order at drop time so the dropped row
+  // stays where it landed instead of animating back to its old slot while the
+  // write is in flight. Cleared once liveQuery catches up.
+  const [optimistic, setOptimistic] = useState<OptimisticTree | null>(null);
+
+  const baseGroups = optimistic?.groups ?? groups;
+  const baseSubgroups = optimistic?.subgroups ?? subgroups;
+
   const flatItems = useMemo(
+    () => buildFlatTree(baseGroups, baseSubgroups),
+    [baseGroups, baseSubgroups],
+  );
+
+  const liveFlatItems = useMemo(
     () => buildFlatTree(groups, subgroups),
     [groups, subgroups],
   );
+
+  useEffect(() => {
+    if (!optimistic) return;
+    if (orderSignature(liveFlatItems) === optimistic.signature) {
+      setOptimistic(null);
+    }
+  }, [liveFlatItems, optimistic]);
 
   const activeItem = activeId
     ? flatItems.find((i) => i.id === activeId)
@@ -139,6 +172,16 @@ export function Sidebar() {
       const orderedGroupIds = next
         .filter((i) => i.node.type === "group")
         .map((i) => i.id);
+      const rank = new Map(orderedGroupIds.map((id, index) => [id, index]));
+      const nextGroups = groups.map((g) => ({
+        ...g,
+        sortOrder: ((rank.get(g.id) ?? 0) + 1) * SORT_ORDER_STEP,
+      }));
+      setOptimistic({
+        groups: nextGroups,
+        subgroups,
+        signature: orderSignature(buildFlatTree(nextGroups, subgroups)),
+      });
       void reorderGroups(orderedGroupIds);
       return;
     }
@@ -146,6 +189,25 @@ export function Sidebar() {
     const orderedSiblings = next
       .filter((i) => i.node.type === "subgroup" && i.parentId === proj.parentId)
       .map((i) => i.id);
+    const rank = new Map(orderedSiblings.map((id, index) => [id, index]));
+    const nextSubgroups = subgroups.map((s) => {
+      if (s.id === String(active.id)) {
+        return {
+          ...s,
+          groupId: proj.parentId,
+          sortOrder: ((rank.get(s.id) ?? 0) + 1) * SORT_ORDER_STEP,
+        };
+      }
+      if (rank.has(s.id)) {
+        return { ...s, sortOrder: (rank.get(s.id)! + 1) * SORT_ORDER_STEP };
+      }
+      return s;
+    });
+    setOptimistic({
+      groups,
+      subgroups: nextSubgroups,
+      signature: orderSignature(buildFlatTree(groups, nextSubgroups)),
+    });
     void moveSubgroupToGroup(String(active.id), proj.parentId, orderedSiblings);
   };
 
