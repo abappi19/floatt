@@ -105,8 +105,6 @@ State flows in one direction inside each module (`packages/app/src` today):
 
 The Tasks data model is **Group → Subgroup (a "list") → Task → Subtask (a "step")**, with types in `types/` validated by Zod schemas. Smart lists (`my-day`, `important`, `planned`, `tasks`) are *virtual* — computed by filtering tasks rather than stored in a table.
 
-See [`CLAUDE.md`](./CLAUDE.md) for the full architecture guide.
-
 ## Roadmap
 
 - [x] Tasks module — lists, steps, smart lists, reminders, recurrence, drag-and-drop, themes
