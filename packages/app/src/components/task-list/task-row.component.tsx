@@ -57,102 +57,102 @@ export function TaskRow({ task }: TaskRowProps) {
 
   return (
     <TaskContextMenu task={task}>
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() => selectTask(task.id)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          selectTask(task.id);
-        } else if (e.key === " " || e.code === "Space") {
-          e.preventDefault();
-          void setTaskCompleted(task.id, !isCompleted);
-        }
-      }}
-      className={cn(
-        "group flex w-full cursor-default items-start gap-2 rounded-md border border-transparent bg-card px-3 py-2 text-sm shadow-xs transition-colors hover:bg-accent/60 focus-visible:ring-[2px] focus-visible:ring-ring/50 focus-visible:outline-none",
-        isActive && "border-primary/20 bg-accent shadow-sm",
-      )}
-    >
-      <RoundCheckbox
-        checked={isCompleted}
-        onCheckedChange={handleToggle}
-        onClick={(e) => e.stopPropagation()}
-        aria-label={isCompleted ? "Mark as not completed" : "Mark as completed"}
-        className="mt-0.5 size-4"
-      />
-
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span
-          className={cn(
-            "truncate",
-            isCompleted && "text-muted-foreground line-through",
-          )}
-        >
-          {task.title}
-        </span>
-
-        {(dueDateLabel ||
-          reminderLabel ||
-          total > 0 ||
-          hasNotes ||
-          task.repeat) && (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-            {dueDateLabel ? (
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1",
-                  isOverdue ? "text-destructive" : "text-sky-500",
-                )}
-              >
-                <Calendar className="size-3" />
-                {dueDateLabel}
-              </span>
-            ) : null}
-            {reminderLabel ? (
-              <span className="inline-flex items-center gap-1 text-amber-500">
-                <Bell className="size-3" />
-                {reminderLabel}
-              </span>
-            ) : null}
-            {task.repeat ? (
-              <span className="inline-flex items-center gap-1 text-emerald-500">
-                <Repeat className="size-3" />
-                {task.repeat.kind}
-              </span>
-            ) : null}
-            {total > 0 ? (
-              <span className="inline-flex items-center gap-1 tabular-nums text-violet-500">
-                <ListChecks className="size-3" />
-                {done}/{total}
-              </span>
-            ) : null}
-            {hasNotes ? (
-              <span className="inline-flex items-center gap-1 text-orange-400">
-                <StickyNote className="size-3" />
-                Note
-              </span>
-            ) : null}
-          </div>
-        )}
-      </div>
-
-      <button
-        type="button"
-        onClick={handleStar}
-        aria-label={isImportant ? "Remove flag" : "Flag as important"}
-        aria-pressed={isImportant}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => selectTask(task.id)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            selectTask(task.id);
+          } else if (e.key === " " || e.code === "Space") {
+            e.preventDefault();
+            void setTaskCompleted(task.id, !isCompleted);
+          }
+        }}
         className={cn(
-          "mt-0.5 shrink-0 rounded-sm p-0.5 text-muted-foreground/50 transition-colors hover:text-rose-400 focus-visible:ring-[2px] focus-visible:ring-ring/50 focus-visible:outline-none",
-          isImportant && "text-rose-500 hover:text-rose-500",
+          "group flex w-full cursor-default items-center gap-2 rounded-md border border-transparent bg-card px-2 py-1 text-sm shadow-xs transition-colors hover:bg-accent/60 focus-visible:ring-[2px] focus-visible:ring-ring/50 focus-visible:outline-none",
+          isActive && "border-primary/20 bg-accent shadow-sm",
         )}
       >
-        <Bookmark
-          className={cn("size-4", isImportant && "fill-current")}
+        <RoundCheckbox
+          checked={isCompleted}
+          onCheckedChange={handleToggle}
+          onClick={(e) => e.stopPropagation()}
+          aria-label={isCompleted ? "Mark as not completed" : "Mark as completed"}
+          className="mt-0.5 size-4"
         />
-      </button>
-    </div>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <span
+            className={cn(
+              "truncate",
+              isCompleted && "text-muted-foreground line-through",
+            )}
+          >
+            {task.title}
+          </span>
+
+          {(dueDateLabel ||
+            reminderLabel ||
+            total > 0 ||
+            hasNotes ||
+            task.repeat) && (
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+                {total > 0 ? (
+                  <span className="inline-flex items-center gap-0.5 tabular-nums text-violet-500">
+                    <ListChecks className="size-2.5" />
+                    {done}/{total}
+                  </span>
+                ) : null}
+                {dueDateLabel ? (
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-0.5",
+                      isOverdue ? "text-destructive" : "text-sky-500",
+                    )}
+                  >
+                    <Calendar className="size-2.5" />
+                    {dueDateLabel}
+                  </span>
+                ) : null}
+                {reminderLabel ? (
+                  <span className="inline-flex items-center gap-0.5 text-amber-500">
+                    <Bell className="size-2.5" />
+                    {reminderLabel}
+                  </span>
+                ) : null}
+                {task.repeat ? (
+                  <span className="inline-flex items-center gap-0.5 text-emerald-500">
+                    <Repeat className="size-2.5" />
+                    {task.repeat.kind}
+                  </span>
+                ) : null}
+                {hasNotes ? (
+                  <span className="inline-flex items-center gap-0.5 text-orange-400">
+                    <StickyNote className="size-3" />
+                    Note
+                  </span>
+                ) : null}
+              </div>
+            )}
+        </div>
+
+        <button
+          type="button"
+          onClick={handleStar}
+          aria-label={isImportant ? "Remove flag" : "Flag as important"}
+          aria-pressed={isImportant}
+          className={cn(
+            "mt-0.5 shrink-0 rounded-sm p-0.5 text-muted-foreground/50 transition-colors hover:text-rose-400 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
+            isImportant && "text-rose-500 hover:text-rose-500",
+          )}
+        >
+          <Bookmark
+            className={cn("size-4", isImportant && "fill-current")}
+          />
+        </button>
+      </div>
     </TaskContextMenu>
   );
 }
