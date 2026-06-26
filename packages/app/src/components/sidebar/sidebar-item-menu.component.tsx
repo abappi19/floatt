@@ -1,7 +1,12 @@
 import { MoreHorizontal } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { createElement } from "react";
-import type { ComponentType, ReactElement, ReactNode } from "react";
+import { cloneElement, createElement } from "react";
+import type {
+  ComponentType,
+  MouseEvent as ReactMouseEvent,
+  ReactElement,
+  ReactNode,
+} from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Button } from "@/components/ui/button.ui";
 import {
@@ -208,6 +213,28 @@ export function SidebarItemContextMenu({
   disabled,
   children,
 }: SidebarItemContextMenuProps) {
+  const { menu } = usePlatform();
+
+  if (menu.presentation === "native") {
+    const childOnContextMenu = (
+      children.props as {
+        onContextMenu?: (e: ReactMouseEvent) => void;
+      }
+    ).onContextMenu;
+    return cloneElement(children, {
+      onContextMenu: (e: ReactMouseEvent) => {
+        childOnContextMenu?.(e);
+        if (disabled) return;
+        e.preventDefault();
+        e.stopPropagation();
+        void menu.popup(toPlatformItems(actions), {
+          x: e.clientX,
+          y: e.clientY,
+        });
+      },
+    } as Partial<typeof children.props>);
+  }
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild disabled={disabled}>
