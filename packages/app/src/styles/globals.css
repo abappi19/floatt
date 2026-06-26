@@ -75,19 +75,6 @@
   --sidebar-ring: oklch(0.68 0.22 275);
 }
 
-/*
- * Per-list themes. The task-list pane sets the accent tokens (--primary/--accent)
- * and the background layer (--theme-bg / --theme-pattern) inline per theme + mode
- * (see consts/themes.const.ts `themeStyle`). Neutrals (card/foreground/border)
- * intentionally inherit the base tokens so text stays legible on every theme.
- */
-.theme-surface {
-  background-image: var(--theme-pattern, none), var(--theme-bg, none);
-  background-repeat: repeat, no-repeat;
-  background-size: var(--theme-pattern-size, 24px 24px), cover;
-  background-position: center;
-}
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

@@ -79,7 +79,8 @@ export function TaskRow({ task }: TaskRowProps) {
           }
         }}
         className={cn(
-          "group flex w-full cursor-default items-center gap-2 rounded-md bg-card p-2 text-sm shadow-xs transition-colors hover:bg-accent/60 focus-visible:ring-[2px] focus-visible:ring-ring/50 focus-visible:outline-none",
+          "group flex w-full cursor-default items-center gap-2 rounded-md bg-card p-2 text-sm shadow-xs transition-colors hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
+          "opacity-85",
           isActive && "border-primary/20 bg-accent shadow-sm",
         )}
       >
