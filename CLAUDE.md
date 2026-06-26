@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Always use Kitten Bot
+
+At the start of **every** task in this repo, invoke the **kitten-bot** skill (via the Skill tool) and follow its routing before responding — for all requests (code, reviews, planning, commits, debugging), not only when `/kitten-bot` is typed. If the skill is already active in the current session, continue routing through it rather than re-invoking.
+
 ## What this is
 
 Floatt is a local-first task manager (Microsoft To Do–style: groups → lists → tasks → steps, plus smart lists like My Day, Important, Planned). It ships as both a **web app** and a **Tauri desktop app** that share a single React codebase. There is no backend — all data lives in the browser/embedded IndexedDB via Dexie.
