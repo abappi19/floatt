@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -13,12 +13,20 @@ import {
 import { Button } from "@/components/ui/button.ui";
 import { Input } from "@/components/ui/input.ui";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select.ui";
+import {
   subgroupCreateFormSchema,
   type SubgroupCreateForm,
 } from "@/schemas";
 import { useGroups } from "@/hooks";
 import { createSubgroup } from "@/services";
-import { cn } from "@/utils/cn.util";
+
+const NO_GROUP = "__none__";
 
 interface NewListDialogProps {
   open: boolean;
@@ -39,6 +47,7 @@ export function NewListDialog({
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<SubgroupCreateForm>({
     resolver: zodResolver(subgroupCreateFormSchema),
@@ -93,23 +102,30 @@ export function NewListDialog({
               <label htmlFor="list-group" className="text-sm font-medium">
                 Group
               </label>
-              <select
-                id="list-group"
-                className={cn(
-                  "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none",
-                  "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+              <Controller
+                control={control}
+                name="groupId"
+                render={({ field }) => (
+                  <Select
+                    value={field.value ?? NO_GROUP}
+                    onValueChange={(value) =>
+                      field.onChange(value === NO_GROUP ? null : value)
+                    }
+                  >
+                    <SelectTrigger id="list-group">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NO_GROUP}>No group</SelectItem>
+                      {groups.map((g) => (
+                        <SelectItem key={g.id} value={g.id}>
+                          {g.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 )}
-                {...register("groupId", {
-                  setValueAs: (v) => (v === "" ? null : v),
-                })}
-              >
-                <option value="">No group</option>
-                {groups.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
           ) : null}
           <DialogFooter>
