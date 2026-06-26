@@ -9,6 +9,7 @@ import {
   FolderInput,
   FolderMinus,
   GripVertical,
+  Palette,
   Pencil,
   Star,
   Trash2,
@@ -20,7 +21,7 @@ import {
   SidebarItemMenu,
   type SidebarMenuAction,
 } from "@/components/sidebar/sidebar-item-menu.component";
-import { SMART_LISTS } from "@/consts";
+import { SMART_LISTS, themeStyle } from "@/consts";
 import type { ListSelection, Task } from "@/types";
 import {
   useAllTasks,
@@ -28,12 +29,14 @@ import {
   useImportantTasks,
   useMyDay,
   usePlannedTasks,
+  useListTheme,
   useSelectList,
   useSelectedList,
   useSetTaskSort,
   useSubgroups,
   useTaskSort,
   useTasks,
+  useTheme,
   useWindowInsets,
 } from "@/hooks";
 import { deleteSubgroup, moveSubgroup, renameSubgroup } from "@/services";
@@ -45,6 +48,7 @@ import { MyDaySuggestions } from "./my-day-suggestions.component";
 import { NewTaskInput } from "./new-task-input.component";
 import { TaskRow } from "./task-row.component";
 import { SortableTaskList } from "./sortable-task-list.component";
+import { ThemeDialog } from "./theme-dialog.component";
 
 function sortTasks(tasks: Task[], sort: TaskSort): Task[] {
   if (sort === "manual") return tasks;
@@ -257,6 +261,7 @@ function useListOptions(selection: ListSelection) {
       : undefined;
 
   const [isRenaming, setIsRenaming] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
   const [draftName, setDraftName] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const renameInputRef = useRef<HTMLInputElement>(null);
@@ -303,6 +308,13 @@ function useListOptions(selection: ListSelection) {
     })),
   };
 
+  const themeAction: SidebarMenuAction = {
+    kind: "item",
+    label: "Theme",
+    icon: Palette,
+    onSelect: () => setThemeOpen(true),
+  };
+
   const actions: SidebarMenuAction[] = subgroup
     ? [
       { kind: "item", label: "Rename list", icon: Pencil, onSelect: startRename },
@@ -329,6 +341,7 @@ function useListOptions(selection: ListSelection) {
         ],
       },
       sortAction,
+      themeAction,
       { kind: "separator" },
       {
         kind: "item",
@@ -338,7 +351,7 @@ function useListOptions(selection: ListSelection) {
         onSelect: () => setConfirmDelete(true),
       },
     ]
-    : [sortAction];
+    : [sortAction, themeAction];
 
   return {
     subgroup,
@@ -349,6 +362,8 @@ function useListOptions(selection: ListSelection) {
     renameInputRef,
     commitRename,
     cancelRename: () => setIsRenaming(false),
+    themeOpen,
+    setThemeOpen,
     confirmDelete,
     setConfirmDelete,
     deleteList: () => {
@@ -365,9 +380,14 @@ export function TaskList() {
   const title = useListTitle(selection);
   const insets = useWindowInsets();
   const options = useListOptions(selection);
+  const theme = useListTheme(selection);
+  const mode = useTheme();
 
   return (
-    <div className="flex h-full flex-col">
+    <div
+      className="theme-surface flex h-full flex-col"
+      style={themeStyle(theme, mode) as React.CSSProperties}
+    >
       <header style={{ paddingTop: insets.top || undefined }} className="px-6">
         <div className="flex items-center gap-3">
           {
@@ -416,6 +436,12 @@ export function TaskList() {
       <div className="p-3">
         <NewTaskInput selection={selection} />
       </div>
+
+      <ThemeDialog
+        selection={selection}
+        open={options.themeOpen}
+        onOpenChange={options.setThemeOpen}
+      />
 
       <ConfirmDestructiveDialog
         open={options.confirmDelete}

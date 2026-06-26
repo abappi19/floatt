@@ -4,6 +4,7 @@ import {
   FolderInput,
   FolderMinus,
   ListTodo,
+  Palette,
   Pencil,
   Trash2,
 } from "lucide-react";
@@ -22,6 +23,7 @@ import {
   SidebarItemMenu,
   type SidebarMenuAction,
 } from "./sidebar-item-menu.component";
+import { ThemeDialog } from "@/components/task-list/theme-dialog.component";
 import { SUBGROUP_INDENT_PX, TREE_BASE_PADDING_PX } from "./tree.util";
 
 interface SubgroupItemProps {
@@ -54,6 +56,7 @@ export function SubgroupItem({
   const [isRenaming, setIsRenaming] = useState(false);
   const [draftName, setDraftName] = useState(subgroup.name);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -135,6 +138,12 @@ export function SubgroupItem({
         })),
       ],
     },
+    {
+      kind: "item",
+      label: "Theme",
+      icon: Palette,
+      onSelect: () => setThemeOpen(true),
+    },
     { kind: "separator" },
     {
       kind: "item",
@@ -208,6 +217,11 @@ export function SubgroupItem({
         title={`Delete "${subgroup.name}"?`}
         description="This permanently deletes the list and all its tasks."
         onConfirm={() => deleteSubgroup(subgroup.id)}
+      />
+      <ThemeDialog
+        selection={{ kind: "subgroup", id: subgroup.id }}
+        open={themeOpen}
+        onOpenChange={setThemeOpen}
       />
     </>
   );
