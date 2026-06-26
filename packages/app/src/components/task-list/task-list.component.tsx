@@ -4,13 +4,13 @@ import {
   ArrowUpDown,
   Calendar,
   Clock,
+  Flame,
   Folder,
   FolderInput,
   FolderMinus,
   GripVertical,
   Pencil,
   Star,
-  Sun,
   Trash2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -117,7 +117,7 @@ const SORT_OPTIONS: { value: TaskSort; label: string; icon: LucideIcon }[] = [
   { value: "alpha", label: "Alphabetically", icon: ArrowDownAZ },
   { value: "due", label: "Due date", icon: Calendar },
   { value: "created", label: "Creation date", icon: Clock },
-  { value: "myday", label: "Added to My Day", icon: Sun },
+  { value: "myday", label: "Added to My Day", icon: Flame },
 ];
 
 function useListTitle(selection: ListSelection): string {
@@ -404,7 +404,7 @@ export function TaskList() {
         </div>
       </header>
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 min-h-0">
         <div className="flex min-h-full flex-col gap-3 px-3 py-3">
           {selection.kind === "smart" && selection.id === "my-day" ? (
             <MyDaySuggestions />
@@ -413,7 +413,7 @@ export function TaskList() {
         </div>
       </ScrollArea>
 
-      <div className="border-t p-3">
+      <div className="p-3">
         <NewTaskInput selection={selection} />
       </div>
 

@@ -1,4 +1,4 @@
-import { Sun, X } from "lucide-react";
+import { Flame, X } from "lucide-react";
 import { addToMyDay, removeFromMyDay } from "@/services";
 import { todayIsoDate } from "@/utils";
 import { cn } from "@/utils/cn.util";
@@ -34,7 +34,7 @@ export function AddToMyDayButton({ task }: AddToMyDayButtonProps) {
           inMyDay && "text-foreground",
         )}
       >
-        <Sun className="size-4 shrink-0 text-muted-foreground" />
+        <Flame className="size-4 shrink-0 text-muted-foreground" />
         <span className={cn("flex-1 truncate", !inMyDay && "text-muted-foreground")}>
           {inMyDay ? "Added to My Day" : "Add to My Day"}
         </span>

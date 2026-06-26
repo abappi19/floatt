@@ -7,10 +7,10 @@ import {
   CalendarClock,
   CalendarDays,
   CircleCheck,
+  Flame,
   ListPlus,
   ListTodo,
   Star,
-  Sun,
   Trash2,
 } from "lucide-react";
 import type { Task } from "@/types";
@@ -67,7 +67,7 @@ export function TaskContextMenu({ task, children }: TaskContextMenuProps) {
     {
       kind: "item",
       label: inMyDay ? "Remove from My Day" : "Add to My Day",
-      icon: Sun,
+      icon: Flame,
       onSelect: () =>
         void (inMyDay ? removeFromMyDay(task.id) : addToMyDay(task.id)),
     },

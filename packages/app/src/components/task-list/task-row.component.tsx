@@ -79,7 +79,7 @@ export function TaskRow({ task }: TaskRowProps) {
           }
         }}
         className={cn(
-          "group flex w-full cursor-default items-center gap-2 rounded-md border border-transparent bg-card px-2 py-1 text-sm shadow-xs transition-colors hover:bg-accent/60 focus-visible:ring-[2px] focus-visible:ring-ring/50 focus-visible:outline-none",
+          "group flex w-full cursor-default items-center gap-2 rounded-md bg-card p-2 text-sm shadow-xs transition-colors hover:bg-accent/60 focus-visible:ring-[2px] focus-visible:ring-ring/50 focus-visible:outline-none",
           isActive && "border-primary/20 bg-accent shadow-sm",
         )}
       >
@@ -94,7 +94,7 @@ export function TaskRow({ task }: TaskRowProps) {
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span
             className={cn(
-              "truncate",
+              "truncate text-xs",
               isCompleted && "text-muted-foreground line-through",
             )}
           >

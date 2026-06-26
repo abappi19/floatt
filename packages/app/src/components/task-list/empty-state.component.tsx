@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
-import { Calendar, ListTodo, Star, Sun, Inbox } from "lucide-react";
+import { Inbox } from "lucide-react";
 import type { ListSelection, SmartListId } from "@/types";
+import { SMART_LISTS } from "@/consts";
 
 interface EmptyCopy {
   icon: LucideIcon;
@@ -8,24 +9,28 @@ interface EmptyCopy {
   description: string;
 }
 
+function smartIcon(id: SmartListId): LucideIcon {
+  return SMART_LISTS.find((s) => s.id === id)?.icon ?? Inbox;
+}
+
 const SMART_EMPTY: Record<SmartListId, EmptyCopy> = {
   "my-day": {
-    icon: Sun,
+    icon: smartIcon("my-day"),
     title: "Focus on your day",
     description: "Add tasks you want to get done today.",
   },
   important: {
-    icon: Star,
+    icon: smartIcon("important"),
     title: "Make things happen",
     description: "Mark tasks with a star to see them here.",
   },
   planned: {
-    icon: Calendar,
+    icon: smartIcon("planned"),
     title: "Get organized",
     description: "Tasks with a due date show up here.",
   },
   tasks: {
-    icon: ListTodo,
+    icon: smartIcon("tasks"),
     title: "All tasks",
     description: "Every task from every list, in one place.",
   },
