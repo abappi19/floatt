@@ -38,19 +38,13 @@ function loadImageElement(src: string): Promise<HTMLImageElement> {
   });
 }
 
-function canvasToPng(canvas: HTMLCanvasElement): Promise<Uint8Array> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(async (blob) => {
-      if (!blob) return reject(new Error("icon encode failed"));
-      resolve(new Uint8Array(await blob.arrayBuffer()));
-    }, "image/png");
-  });
-}
-
 /**
  * Rasterize a lucide SVG into a native menu image. lucide draws with
  * `currentColor`, which resolves to black in a standalone SVG, so we inject the
  * app's foreground color to keep icons legible against the current OS theme.
+ *
+ * We hand Tauri raw RGBA via `Image.new` (rather than `Image.fromBytes`, which
+ * would require the `image-png` Cargo feature to decode).
  */
 async function svgToNativeImage(svg: string): Promise<Image | undefined> {
   try {
@@ -65,7 +59,8 @@ async function svgToNativeImage(svg: string): Promise<Image | undefined> {
     const ctx = canvas.getContext("2d");
     if (!ctx) return undefined;
     ctx.drawImage(el, 0, 0, size, size);
-    return await Image.fromBytes(await canvasToPng(canvas));
+    const { data } = ctx.getImageData(0, 0, size, size);
+    return await Image.new(new Uint8Array(data.buffer), size, size);
   } catch {
     return undefined;
   }

@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowDownAZ,
   ArrowUpDown,
+  Calendar,
+  Clock,
   Folder,
   FolderInput,
   FolderMinus,
   Pencil,
+  Star,
+  Sun,
   Trash2,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area.ui";
 import { ConfirmDestructiveDialog } from "@/components/ui/confirm-destructive-dialog.ui";
 import {
@@ -37,10 +43,8 @@ import { EmptyState } from "./empty-state.component";
 import { MyDaySuggestions } from "./my-day-suggestions.component";
 import { NewTaskInput } from "./new-task-input.component";
 import { TaskRow } from "./task-row.component";
-import { SortableTaskList } from "./sortable-task-list.component";
 
 function sortTasks(tasks: Task[], sort: TaskSort): Task[] {
-  if (sort === "default") return tasks;
   const copy = [...tasks];
   if (sort === "alpha") {
     copy.sort((a, b) => a.title.localeCompare(b.title));
@@ -56,30 +60,21 @@ function sortTasks(tasks: Task[], sort: TaskSort): Task[] {
       if (!b.dueDate) return -1;
       return a.dueDate.localeCompare(b.dueDate);
     });
+  } else if (sort === "created") {
+    copy.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  } else if (sort === "myday") {
+    copy.sort((a, b) => {
+      if (!a.addedToMyDayAt && !b.addedToMyDayAt) return 0;
+      if (!a.addedToMyDayAt) return 1;
+      if (!b.addedToMyDayAt) return -1;
+      return b.addedToMyDayAt.localeCompare(a.addedToMyDayAt);
+    });
   }
   return copy;
 }
 
 function flattenPlanned(b: PlannedBuckets): Task[] {
   return [...b.today, ...b.tomorrow, ...b.thisWeek, ...b.later];
-}
-
-function TaskSection({ title, tasks }: { title: string; tasks: Task[] }) {
-  if (tasks.length === 0) return null;
-  return (
-    <div className="flex flex-col gap-1.5">
-      <h3 className="px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {title}
-      </h3>
-      <ul className="flex flex-col gap-1">
-        {tasks.map((t) => (
-          <li key={t.id}>
-            <TaskRow task={t} />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
 }
 
 function TaskFlatList({ tasks }: { tasks: Task[] }) {
@@ -95,12 +90,13 @@ function TaskFlatList({ tasks }: { tasks: Task[] }) {
   );
 }
 
-const SORT_LABEL: Record<TaskSort, string> = {
-  default: "Default",
-  due: "Due date",
-  importance: "Importance",
-  alpha: "Alphabetical",
-};
+const SORT_OPTIONS: { value: TaskSort; label: string; icon: LucideIcon }[] = [
+  { value: "importance", label: "Important", icon: Star },
+  { value: "alpha", label: "Alphabetically", icon: ArrowDownAZ },
+  { value: "due", label: "Due date", icon: Calendar },
+  { value: "created", label: "Creation date", icon: Clock },
+  { value: "myday", label: "Added to My Day", icon: Sun },
+];
 
 function useListTitle(selection: ListSelection): string {
   const subgroups = useSubgroups();
@@ -126,14 +122,8 @@ function useSubgroupListBody(id: string, sort: TaskSort): ListBody {
     () => tasks.filter((t) => t.isCompleted === 1),
     [tasks],
   );
-  const body =
-    sort === "default" ? (
-      <SortableTaskList tasks={pending} />
-    ) : (
-      <TaskFlatList tasks={pending} />
-    );
   return {
-    pending: body,
+    pending: <TaskFlatList tasks={pending} />,
     completed,
     isEmpty: pending.length === 0 && completed.length === 0,
   };
@@ -164,19 +154,10 @@ function usePlannedListBody(sort: TaskSort): ListBody {
     buckets.thisWeek.length +
     buckets.later.length;
 
-  const content = useMemo(() => {
-    if (sort === "default") {
-      return (
-        <div className="flex flex-col gap-5">
-          <TaskSection title="Today" tasks={buckets.today} />
-          <TaskSection title="Tomorrow" tasks={buckets.tomorrow} />
-          <TaskSection title="This week" tasks={buckets.thisWeek} />
-          <TaskSection title="Later" tasks={buckets.later} />
-        </div>
-      );
-    }
-    return <TaskFlatList tasks={sortTasks(flattenPlanned(buckets), sort)} />;
-  }, [buckets, sort]);
+  const content = useMemo(
+    () => <TaskFlatList tasks={sortTasks(flattenPlanned(buckets), sort)} />,
+    [buckets, sort],
+  );
 
   return {
     pending: content,
@@ -283,10 +264,11 @@ function useListOptions(selection: ListSelection) {
     kind: "submenu",
     label: "Sort",
     icon: ArrowUpDown,
-    items: (Object.keys(SORT_LABEL) as TaskSort[]).map((s) => ({
+    items: SORT_OPTIONS.map((o) => ({
       kind: "item",
-      label: (sort === s ? "✓ " : "") + SORT_LABEL[s],
-      onSelect: () => setSort(s),
+      label: (sort === o.value ? "✓ " : "") + o.label,
+      icon: o.icon,
+      onSelect: () => setSort(o.value),
     })),
   };
 
