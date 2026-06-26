@@ -1,5 +1,13 @@
-import { useMemo } from "react";
-import { Bell, Bookmark, Calendar, ListChecks, Repeat, StickyNote } from "lucide-react";
+import { Fragment, useMemo } from "react";
+import {
+  Bell,
+  Calendar,
+  Check,
+  ListChecks,
+  Repeat,
+  Star,
+  StickyNote,
+} from "lucide-react";
 import { RoundCheckbox } from "@/components/ui/round-checkbox.ui";
 import { cn } from "@/utils/cn.util";
 import { formatDue, startOfDay } from "@/utils";
@@ -98,42 +106,83 @@ export function TaskRow({ task }: TaskRowProps) {
             total > 0 ||
             hasNotes ||
             task.repeat) && (
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
-                {total > 0 ? (
-                  <span className="inline-flex items-center gap-0.5 tabular-nums text-violet-500">
-                    <ListChecks className="size-2.5" />
-                    {done}/{total}
-                  </span>
-                ) : null}
-                {dueDateLabel ? (
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-0.5",
-                      isOverdue ? "text-destructive" : "text-sky-500",
-                    )}
-                  >
-                    <Calendar className="size-2.5" />
-                    {dueDateLabel}
-                  </span>
-                ) : null}
-                {reminderLabel ? (
-                  <span className="inline-flex items-center gap-0.5 text-amber-500">
-                    <Bell className="size-2.5" />
-                    {reminderLabel}
-                  </span>
-                ) : null}
-                {task.repeat ? (
-                  <span className="inline-flex items-center gap-0.5 text-emerald-500">
-                    <Repeat className="size-2.5" />
-                    {task.repeat.kind}
-                  </span>
-                ) : null}
-                {hasNotes ? (
-                  <span className="inline-flex items-center gap-0.5 text-orange-400">
-                    <StickyNote className="size-3" />
-                    Note
-                  </span>
-                ) : null}
+              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-muted-foreground">
+                {[
+                  total > 0 ? (
+                    <span
+                      key="subtasks"
+                      className={cn(
+                        "inline-flex items-center gap-0.5 tabular-nums",
+                        !isCompleted && "text-violet-500",
+                      )}
+                    >
+                      {done === total ? (
+                        <Check className="size-2.5" />
+                      ) : (
+                        <ListChecks className="size-2.5" />
+                      )}
+                      {done} of {total}
+                    </span>
+                  ) : null,
+                  dueDateLabel ? (
+                    <span
+                      key="due"
+                      className={cn(
+                        "inline-flex items-center gap-0.5",
+                        !isCompleted &&
+                          (isOverdue ? "text-destructive" : "text-sky-500"),
+                      )}
+                    >
+                      <Calendar className="size-2.5" />
+                      {dueDateLabel}
+                    </span>
+                  ) : null,
+                  reminderLabel ? (
+                    <span
+                      key="reminder"
+                      className={cn(
+                        "inline-flex items-center gap-0.5",
+                        !isCompleted && "text-amber-500",
+                      )}
+                    >
+                      <Bell className="size-2.5" />
+                      {reminderLabel}
+                    </span>
+                  ) : null,
+                  task.repeat ? (
+                    <span
+                      key="repeat"
+                      className={cn(
+                        "inline-flex items-center gap-0.5",
+                        !isCompleted && "text-emerald-500",
+                      )}
+                    >
+                      <Repeat className="size-2.5" />
+                      {task.repeat.kind}
+                    </span>
+                  ) : null,
+                  hasNotes ? (
+                    <span
+                      key="note"
+                      className={cn(
+                        "inline-flex items-center gap-0.5",
+                        !isCompleted && "text-orange-400",
+                      )}
+                    >
+                      <StickyNote className="size-3" />
+                      Note
+                    </span>
+                  ) : null,
+                ]
+                  .filter(Boolean)
+                  .map((node, i) => (
+                    <Fragment key={i}>
+                      {i > 0 ? (
+                        <span className="text-muted-foreground/40">·</span>
+                      ) : null}
+                      {node}
+                    </Fragment>
+                  ))}
               </div>
             )}
         </div>
@@ -141,14 +190,14 @@ export function TaskRow({ task }: TaskRowProps) {
         <button
           type="button"
           onClick={handleStar}
-          aria-label={isImportant ? "Remove flag" : "Flag as important"}
+          aria-label={isImportant ? "Remove importance" : "Mark as important"}
           aria-pressed={isImportant}
           className={cn(
             "mt-0.5 shrink-0 rounded-sm p-0.5 text-muted-foreground/50 transition-colors hover:text-rose-400 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
             isImportant && "text-rose-500 hover:text-rose-500",
           )}
         >
-          <Bookmark
+          <Star
             className={cn("size-4", isImportant && "fill-current")}
           />
         </button>
