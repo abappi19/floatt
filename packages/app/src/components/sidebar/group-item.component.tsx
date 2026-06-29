@@ -3,6 +3,7 @@ import { ChevronRight, Folder, Pencil, Trash2 } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import type { Group } from "@/types";
 import { cn } from "@/utils/cn.util";
+import { toTransform } from "@/utils/dnd.util";
 import { useSubgroupsByGroup } from "@/hooks";
 import { ConfirmDestructiveDialog } from "@/components/ui/confirm-destructive-dialog.ui";
 import {
@@ -18,13 +19,6 @@ import {
 
 interface GroupItemProps {
   group: Group;
-}
-
-function toTransform(
-  t: { x: number; y: number; scaleX: number; scaleY: number } | null,
-): string | undefined {
-  if (!t) return undefined;
-  return `translate3d(${t.x}px, ${t.y}px, 0) scaleX(${t.scaleX}) scaleY(${t.scaleY})`;
 }
 
 export function GroupItem({ group }: GroupItemProps) {

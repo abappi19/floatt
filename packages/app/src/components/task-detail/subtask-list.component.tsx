@@ -17,14 +17,8 @@ import {
   restrictToParentElement,
   restrictToVerticalAxis,
 } from "@dnd-kit/modifiers";
-
-function toTransform(
-  t: { x: number; y: number; scaleX: number; scaleY: number } | null,
-): string | undefined {
-  if (!t) return undefined;
-  return `translate3d(${t.x}px, ${t.y}px, 0) scaleX(${t.scaleX}) scaleY(${t.scaleY})`;
-}
 import { cn } from "@/utils/cn.util";
+import { toTransform } from "@/utils/dnd.util";
 import { createSubtask, reorderSubtasks } from "@/services";
 import { useSubtasks } from "@/hooks";
 import type { Subtask } from "@/types";

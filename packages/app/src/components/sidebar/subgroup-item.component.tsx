@@ -10,6 +10,7 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import type { Group, Subgroup } from "@/types";
 import { cn } from "@/utils/cn.util";
+import { toTransform } from "@/utils/dnd.util";
 import { useTasks, useSelectList, useSelectedList } from "@/hooks";
 import { ConfirmDestructiveDialog } from "@/components/ui/confirm-destructive-dialog.ui";
 import {
@@ -29,13 +30,6 @@ interface SubgroupItemProps {
   groups: Group[];
   /** Tree depth (0 = standalone, 1 = inside a group); drives indentation. */
   depth?: number;
-}
-
-function toTransform(
-  t: { x: number; y: number; scaleX: number; scaleY: number } | null,
-): string | undefined {
-  if (!t) return undefined;
-  return `translate3d(${t.x}px, ${t.y}px, 0) scaleX(${t.scaleX}) scaleY(${t.scaleY})`;
 }
 
 export function SubgroupItem({

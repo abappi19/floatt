@@ -12,14 +12,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
-
-function toTransform(
-  t: { x: number; y: number; scaleX: number; scaleY: number } | null,
-): string | undefined {
-  if (!t) return undefined;
-  return `translate3d(${t.x}px, ${t.y}px, 0) scaleX(${t.scaleX}) scaleY(${t.scaleY})`;
-}
 import type { Task } from "@/types";
+import { toTransform } from "@/utils/dnd.util";
 import { reorderTasks } from "@/services";
 import { useSetTaskSort } from "@/hooks";
 import { TaskRow } from "./task-row.component";
