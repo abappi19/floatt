@@ -20,6 +20,6 @@ export function useTask(id: string | null | undefined): Task | undefined {
   );
 }
 
-export function useAllTasksIncludingCompleted(): Task[] {
+export function useAllTasks(): Task[] {
   return useLiveQuery(() => getAllTasks(), [], EMPTY);
 }
