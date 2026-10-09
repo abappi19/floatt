@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/utils/zod.util";
 import { repeatSchema } from "./repeat.schema";
 
 const bitSchema = z.union([z.literal(0), z.literal(1)]);

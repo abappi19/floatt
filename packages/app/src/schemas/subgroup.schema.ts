@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/utils/zod.util";
 
 export const subgroupSchema = z.object({
   id: z.string().min(1),
