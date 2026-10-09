@@ -4,6 +4,6 @@ import type { Task } from "@/types";
 
 const EMPTY: Task[] = [];
 
-export function useAllTasks(): Task[] {
+export function useOpenTasks(): Task[] {
   return useLiveQuery(() => getAllNonCompletedTasks(), [], EMPTY);
 }

@@ -3,9 +3,9 @@ import { SMART_LISTS } from "@/consts";
 import type { SmartListId } from "@/types";
 import { cn } from "@/utils/cn.util";
 import {
-  useAllTasks,
   useImportantTasks,
   useMyDay,
+  useOpenTasks,
   usePlannedTasks,
   useSelectList,
   useSelectedList,
@@ -18,7 +18,7 @@ export function SmartListSection() {
   const myDay = useMyDay();
   const important = useImportantTasks();
   const planned = usePlannedTasks();
-  const all = useAllTasks();
+  const open = useOpenTasks();
 
   const counts = useMemo<Record<SmartListId, number>>(
     () => ({
@@ -29,9 +29,9 @@ export function SmartListSection() {
         planned.tomorrow.length +
         planned.thisWeek.length +
         planned.later.length,
-      tasks: all.length,
+      tasks: open.length,
     }),
-    [myDay, important, planned, all],
+    [myDay, important, planned, open],
   );
 
   return (
