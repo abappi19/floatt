@@ -17,7 +17,7 @@ researcherC. Read from `repos/floatt` at `888e81c`. All repo paths below are rel
 
 ### 1.1 Why it needs a home (evidence from this machine)
 
-The `kitten-bot` skill is copied into at least five repos (Floatt and several of the user's other projects, including the pack's own repo). A `diff -rq` shows `SKILL.md` and `agents/session-boot.md` **already differ** between the copies and the pack repo the pack's own repo. That repo holds about 50 `bmad-*` skills as one pack. `~/.claude/` has user skills, agents and commands, plus plugins that `~/.claude/plugins/installed_plugins.json` records per scope (user or project, with `projectPath`). So the library has to deliver three things:
+The `kitten-bot` skill (the example at the time of writing; it has since been removed from Floatt, and the examples below work the same for any skill) is copied into at least five repos (Floatt and several of the user's other projects, including the pack's own repo). A `diff -rq` shows `SKILL.md` and `agents/session-boot.md` **already differ** between the copies and the pack repo the pack's own repo. That repo holds about 50 `bmad-*` skills as one pack. `~/.claude/` has user skills, agents and commands, plus plugins that `~/.claude/plugins/installed_plugins.json` records per scope (user or project, with `projectPath`). So the library has to deliver three things:
 
 - one canonical copy
 - enablement per project
@@ -105,7 +105,7 @@ kitUsage:     "[projectId+itemRef], itemRef, projectId"     // derived: "used by
 copies:       "[repoPath+itemRef], itemRef, contentHash"    // found in linked repos' .claude/, drift view
 ```
 
-- Search reuses the existing Fuse pattern (`services/search.service.ts`) over name, description, tags and the first 2 KB of the body.
+- Search reuses the existing Fuse pattern, the index `components/search/search-results.component.tsx` builds (open PR #9 deletes the unused `services/search.service.ts`), over name, description, tags and the first 2 KB of the body.
 - A library with hundreds of items is the strongest case for the semantic tier in `docs/future-plan/local-ai-plan.md`, embedding `description` for lookups like "find me a skill that writes changesets". When that tier comes, add an `embeddings` row per item, keyed by `contentHash`.
 
 ### 1.6 Import
@@ -152,13 +152,13 @@ Import is read-only on the source and always **copies into the vault**, recordin
 | Platform | `packages/app/src/platform/platform.type.ts`: `notifications`, `opener`, `window`, `menu` | `CLAUDE.md` still lists only notifications and opener, so it's out of date. |
 | Dexie | `services/db.service.ts`, `consts/db.const.ts`: `DB_NAME="floatt"`, `DB_VERSION=1`, tables `groups`, `subgroups`, `tasks` (`[subgroupId+sortOrder]`, `[isCompleted+subgroupId]`), `subtasks` | There has been no schema migration yet. Booleans are stored as `Bit`; `sortOrder` is sparse (`SORT_ORDER_STEP=1000`); IDs come from `nanoid(12)` (`utils/id.util.ts`). |
 | Other persistence | `localStorage`: theme (`ui.store.ts`), per-list themes (`theme.store.ts`, Zustand `persist` key `floatt:list-themes`), sheet width, My Day dismissals, panel layout (`autoSaveId`) | List themes are **not** in Dexie, so today's data is already split across two stores. |
-| Services | `task`, `subtask`, `group`, `subgroup`, `reorder` (rebalances the **whole list** on every move), `repeat`, `reminder`, `my-day`, `search` (Fuse) | — |
+| Services | `task`, `subtask`, `group`, `subgroup`, `reorder` (rebalances the **whole list** on every move), `repeat`, `reminder`, `my-day` (search is a Fuse index inside `search-results.component.tsx`) | — |
 | Stores | `ui.store` (selection, theme, search, sort), `command.store` (nonce-based command requests), `toast.store`, `theme.store` | — |
 | Routing | **None.** `App.tsx` → `AppShell` → `TodoScreen`; `ui.store.selectedList: ListSelection` picks the main view | — |
 | Shell | `screens/todo.screen.tsx`: resizable sidebar / main / detail panels, a right `Sheet` under 900 px, `DragRegion` and `WindowControls` | — |
 | Tauri | `tauri.conf.json`: `csp: null`. `capabilities/default.json`: core, opener, notification, window and menu permissions. `Cargo.toml`: opener and notification plugins only. `lib.rs`: a leftover `greet` command | There are no fs, shell, dialog or sidecar entries. |
 | Tests | `utils/repeat.util.test.ts` only (vitest, `src/**/*.test.{ts,tsx}`) | There's no CI (`.github/` is missing), no linter and no Dexie test setup. |
-| Layer violations | `components/search/search-results.component.tsx` and `hooks/use-keyboard-shortcuts.ts` import `db` directly | Fix these before the write path moves to the vault. |
+| Layer violations | `components/search/search-results.component.tsx` and `hooks/use-keyboard-shortcuts.ts` import `db` directly | Fix these before the write path moves to the vault. (Fixed in PR #8, FL-01.3.) |
 
 ### 2.2 What carries over
 

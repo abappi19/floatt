@@ -38,7 +38,7 @@ Scope grew four times while I worked (actions, Huly/GitHub Projects/Drive, the l
 
 - **Overlapping triggers.** "plan this" matches the `plan` skill, `ccr-plan` and `gsd:plan-phase`. "continue / what's next" matches `plan`, `ccr-next`, `ccr-resume`, `gsd:next` and `gsd:resume-work`. "debug this" matches `ccr-debug` and `gsd:debug`. Claude Code resolves only **identical names**, never overlapping descriptions, so the model picks one, and the pick can differ from run to run.
 - **Hooks with global reach.** Ponytail's SubagentStart hook injected "lazy senior developer" coding rules into *this research agent*. Nobody can see what a hook injects until it bites.
-- **Version drift across scopes.** `expo@claude-plugins-official` is installed four times: user 1.13.6, and projects at 1.2.0 and 1.13.6. `kitten-bot` is copy-pasted into five projects' `.claude/skills`.
+- **Version drift across scopes.** `expo@claude-plugins-official` is installed four times: user 1.13.6, and projects at 1.2.0 and 1.13.6. `kitten-bot` (the example at the time; it has since been removed from Floatt) is copy-pasted into five projects' `.claude/skills`.
 - **Listing cost.** Roughly 100 slash commands from CCR and GSD alone, plus about 90 other skills. Each one's metadata costs context in every session.
 - **Packs of packs.** CCR re-wraps GSD, BMAD and Superpowers. When the upstreams update, the overlays can silently contradict them.
 
@@ -110,8 +110,8 @@ Scope grew four times while I worked (actions, Huly/GitHub Projects/Drive, the l
 | Tool | Licence / open | Isolation | Drives agent via | State | Review / gate | Many tasks and repos UX |
 |---|---|---|---|---|---|---|
 | Claude Code Desktop + web | proprietary | worktree per session (`<repo>/.claude/worktrees`), cloud VM, SSH | native | Anthropic cloud + local | diff line comments, `/code-review` card, CI bar with auto-fix and auto-merge, archive approval card | sidebar of sessions, Projects Overview, Dispatch push notifications, cross-session messaging |
-| Conductor | closed **[unverified]**, free | worktree in `~/conductor/workspaces/<repo>/<ws>` | Claude Code, Codex, Cursor, OpenCode **[mechanism unverified]** | local app | diff viewer, checks, PR, merge, archive | workspace list per repo |
-| Orca (stablyai) | MIT | worktree, SSH remote | any CLI in a PTY (40+ agents) | local + session restore | annotated diffs, GitHub/Linear/Jira drawers | `worktree ps`, orchestration inbox, decision gates, mobile app |
+| Conductor | proprietary; local free, Pro $50/mo for cloud, mobile, API, routines | worktree in `~/conductor/workspaces/<repo>/<city>`, Vercel Sandbox VMs in Cloud | Claude Code through the **Agent SDK** (bundled or system binary); Codex; Cursor through its API; OpenCode; other CLIs in Big Terminal Mode | local app; cloud chats on its servers | turn-by-turn diffs, inline comments to the agent, AI review, Checks tab, todos block merge, PR, automerge, stacks, archive with restore | sidebar by repo and status sections, next-needs-attention hotkey, unread marks |
+| Orca (stablyai) | MIT, free (optional Orca account for mobile pairing and sharing) | worktree, plus SSH hosts, Remote Orca Servers and per-workspace cloud VMs | any CLI in a PTY (30+ preconfigured, permission bypass on by default); experimental Chat UI through the Agent SDK on the user's own `claude` **[local code]** | local runtime, session restore | Annotate AI Diff, commit/push/PR with AI-drafted text, inline checks, auto-merge, stacked PRs | projects sidebar, Agents feed, Agent Dashboard kanban, orchestration inbox and gates, mobile app |
 | Vibe Kanban | Apache-2.0, community-run | worktree | `claude -p` stream-json in/out + `--permission-prompt-tool=stdio` **[local code]** | SQLite in OS app-data | inline diff comments, then PR | kanban board per project |
 | Crystal → Nimbalyst | MIT | worktree | node-pty + stream-json **[local code]** | SQLite `~/.crystal` | diff, squash/commit | session list → session kanban, iOS app |
 | Claude Squad | AGPL-3.0 | worktree + tmux | tmux PTY | `~/.claude-squad/config.json` | diff tab, then checkout/push | TUI list |
@@ -151,21 +151,67 @@ Scope grew four times while I worked (actions, Huly/GitHub Projects/Drive, the l
   - Projects need GitHub.com plus the Claude GitHub App, and burn plan limits faster.
 - CLI side: native worktrees landed in v2.1.49 (Feb 2026) ([verdent](https://www.verdent.ai/guides/claude-code-worktree-setup-guide)); `claude --bg`, `claude agents` (Agent View), `/teleport`, `/remote-control` ([claudelog](https://claudelog.com/faqs/what-is-remote-control-in-claude-code/)); experimental **Agent Teams** with a shared task list and mailbox ([morph](https://www.morphllm.com/claude-code-agent-teams)).
 
-**Conductor** ([site](https://www.conductor.build), [worktrees doc](https://www.conductor.build/docs/concepts/git-worktrees))
-- Mac app by Melty Labs (YC), free, Apple Silicon only, v0.90.
-- Each task is a workspace (branch, files, terminal, diff, review path).
-- Repo settings cover "files to copy" (`.worktreeinclude`-style patterns), setup and run scripts, and checks.
-- Lifecycle: PR, merge, archive. Agents: Claude Code, Codex, Cursor, OpenCode. "Conductor Cloud" was announced.
-- Pain points: per-worktree setup cost; port clashes; one branch per worktree.
+**Conductor** ([site](https://www.conductor.build), [docs](https://www.conductor.build/docs), [pricing](https://www.conductor.build/markdown/pricing), [changelog](https://www.conductor.build/changelog)). Re-checked 2026-10-09 against the site, docs, changelog, terms and the Homebrew cask.
+- Mac app by Melty Labs (YC S24). Proprietary licence (the terms forbid reverse engineering). macOS only, with both Apple Silicon and Intel builds. Version 0.90.1 (2 Oct 2026).
+- **Pricing:** local workspaces free; Pro at $50/mo adds Conductor Cloud (Vercel Sandbox VMs, shipped in 0.78, July 2026), the iOS app, the API and its MCP server, multiplayer and Routines; Teams $60/user; Enterprise custom.
+- **Agents:** chat harnesses for Claude Code, Codex, Cursor and OpenCode. **Claude Code runs through the Claude Agent SDK** ("native Claude Code ... through the Claude Agent SDK"), with a bundled binary (Claude Code 2.1.286 in 0.90) or a system path (`claude_code_executable_path`). Cursor runs through the Cursor API. The user's own logins are used, and secrets are kept in the Keychain. An experimental Big Terminal Mode runs other CLIs (Amp, Pi, Copilot, Gemini) in a terminal.
+- **Workspaces:**
+  - layout: `~/conductor/workspaces/<repo>/<city-name>` (the root can be moved); a project is one repo; sidebar groups by repo and by user sections
+  - status grouping: backlog, in progress, in review, done
+  - new workspaces start from a branch, PR, GitHub issue or Linear issue, and the agent renames the branch after the first prompt
+  - settings files: `.conductor/settings.toml` (shared), `settings.local.toml`, user and managed files
+  - scripts: `scripts.setup`, several named `scripts.run.<id>` entries, and `scripts.archive`
+  - files to copy: `.worktreeinclude` (default `.env*`)
+  - ports: `CONDUCTOR_PORT` is the first of a 10-port range per workspace
+  - Spotlight testing syncs one workspace into the repo root for projects that must run from there
+- **Session view:** chat first, with several chat tabs, a bottom panel (Setup, Run, Terminal), a file editor, an in-app browser that can annotate UI for the agent, HTML/PDF/CSV previews and a `.context` notes folder. Checkpoints are taken every turn, in a private git ref.
+- **Review and ship:**
+  - diff viewer with turn-by-turn diffs, mark-as-viewed, and inline comments that become chat attachments; Claude can comment on the diff itself, and GitHub review comments sync in
+  - an AI Review button with its own model and prompt
+  - a Checks tab (git status, CI, deployments, comments, todos); todos block merging, and failing checks go to the agent in one click
+  - PR creation with an agent-written description, merge from a PR page, automerge, GitHub and Graphite stacks
+  - archive saves uncommitted work as a commit and restores from History; `git.archive_on_merge`
+- **Waiting on you:** no dedicated inbox. The sidebar flags permission and input waits, a hotkey jumps to the next workspace that needs attention, and workspaces can be marked unread. `AskUserQuestion` and plan approval are rendered natively, and tool approvals are opt-in (`tool_approvals_enabled`).
+- **Orchestration:** parallel workspaces, hand-off of plans to new chats, forked chats. Agents create workspaces and drive other sessions only in Cloud, through the API and MCP server.
+- **Automations:** Routines (cloud-only, Pro): scheduled presets or GitHub triggers filtered by label, author and base branch.
+- **Integrations:** GitHub issues and Linear (start a workspace, deep link `conductor://linear_id=…`); no write-back found; no Jira. MCP comes from each agent's own config; "Sync Agent Configs" copies skills, commands and MCP servers between Claude Code and Codex. No library or plugin manager.
+- **Notable:** Conductor's blog says Anthropic's 13 May policy on Agent SDK subscription use in third-party tools is "delayed indefinitely" (secondary source; relevant to the plan's decision 6).
+- Fit for Floatt: Conductor is a polished chat-first worktree runner with good review and ship flow. It has no cross-project inbox, no question tracking, no actions, no library curation, and its automation and agent-to-agent features need its cloud.
 
-**Orca** ([repo](https://github.com/stablyai/orca), [CLI docs](https://www.onorca.dev/docs/cli/overview)). The user already has its CLI **[local]**.
-- Electron, MIT, by Stably AI (YC). The README reports 87.8k stars, which looks inflated **[unverified]**.
-- Model: "if it runs in a terminal, it runs in Orca". Worktrees with parent/child links, WebGL terminals whose scrollback survives restarts, fan one prompt out to several agents and compare.
-- Extras: Design Mode (click a UI element to send its HTML/CSS/screenshot into the prompt), GitHub/Linear/Jira drawers, iOS and Android companions.
-- CLI **[local]**:
-  - `orca orchestration` with runs, `task-create`/`task-update`, `dispatch`, `send`/`check`/`reply`/`inbox`, `ask` (blocks until answered), `gate-create`/`gate-resolve`, and supervised workers.
-  - `orca automations` (scheduled), `orca account add` (managed Claude/Codex accounts), `worktree ps` (summary across worktrees), `artifacts share`.
-  - This is the closest existing match to the user's master/agent model, with **first-class decision gates**.
+**Orca** ([repo](https://github.com/stablyai/orca), [docs](https://www.onorca.dev/docs)). Re-checked 2026-10-09 against the installed app (1.4.196), `orca --help` and `orca agent-context --json` (234 commands), and the docs in a shallow clone of the MIT repo **[local]**. The user has it installed with two repos (empathika-mobile-nurse, bruin), one worktree, no automations and no live orchestration run.
+- Electron app for macOS, Windows and Linux. MIT (Lovecast Inc.), free; "bring your own Claude, Codex, or OpenCode subscription". An optional Orca account is needed only for mobile pairing, artifact links and skill sharing. Telemetry goes to PostHog.
+- **Agents:** "if it runs in a terminal, it runs in Orca": 30+ CLIs preconfigured, each in a PTY.
+  - State (working, needs you, done, blocked) comes from OSC title sequences and Orca-managed status hooks.
+  - Launches default to each CLI's permission-bypass flag (`--dangerously-skip-permissions` for Claude), with a setting to switch to Manual.
+  - An experimental **Chat UI** drives Claude through the Agent SDK (0.3.284) pointed at the user's own `claude` (`pathToClaudeCodeExecutable`, `can_use_tool` handled in Orca's main process), and renders `AskUserQuestion` cards.
+- **Worktrees:**
+  - each has a base ref, a start-from ref (stack on another branch, a SHA, a remote branch) and a parent worktree link; projects group repos in the sidebar
+  - `orca.yaml`: `scripts.setup`, `scripts.archive`, `setupAgentStartupPolicy: wait-for-setup`, `defaultTabs`, `worktree.sharedDirectories` (APFS clone-copy or symlink for `node_modules`)
+  - `.worktreeinclude` copies gitignored files such as `.env`
+  - created in the background, and created from GitHub, GitLab, Linear or Jira items
+- **Terminals, editor, browser:** WebGL terminals with splits and scrollback that survives restarts, a Monaco editor, a Chromium browser with Design Mode, browser automation, computer use, and iOS Simulator and Android emulator control.
+- **Review and ship:**
+  - Annotate AI Diff: line comments sent back to the agent as one batch
+  - stage, commit and push from a Source Control panel, with "Generate with AI" and "Fix with AI" when a hook fails
+  - PR creation with AI-drafted details, inline checks with job logs, "Fix broken checks", auto-merge, stacked PRs with stack-aware merge
+  - GitHub, GitLab, Bitbucket and Azure DevOps reviews; Linear and Jira drawers
+- **Attention:**
+  - an agent-finished notification and a header bell with mark-unread
+  - an **Agents feed** of turn completions, blocking questions and response previews
+  - an experimental **Agent Dashboard** kanban (Needs You, Working, Done, Idle)
+  - worktree "checkpoint" comments and a card status that agents set through the CLI
+- **Orchestration** (experimental): primitives for an LLM coordinator, not a scheduler.
+  - A Run is a namespace with a home inbox and "never schedules or places workers".
+  - Tasks have dependencies, Dispatches run them on terminals, and supervised workers can start in new child worktrees.
+  - Messages are typed (`worker_done`, `escalation`, `question`, `heartbeat`).
+  - `ask` blocks a worker until the coordinator replies; decision gates block a task until resolved.
+  - The CLI warns that "command flags evolve with the app".
+- **Automations:** a prompt on a schedule (presets, cron or RRULE) for one agent, in a new worktree per run or an existing one, with a `--precheck` shell probe that skips the run when it fails.
+- **Accounts and usage:** several Claude and Codex accounts with one-click hot-swap; usage and reset times per window read from `~/.claude` and `~/.codex`, with an 80% warning chip.
+- **Remote:** SSH worktrees with port forwarding, Remote Orca Servers (`orca serve`), per-workspace cloud VMs on the user's own provider, and an iOS/Android companion (status, scrollback, replies, Quick Commands, push notifications).
+- **Sharing:** `orca artifacts share` publishes HTML or Markdown; `orca skills share` publishes skill bundles behind an unlisted link. Orca installs its own skills (`orca-cli`, `orchestration`, `computer-use`, ...) but doesn't curate or lint anyone else's.
+- **Quick Commands:** saved terminal commands or prompts, synced between desktop and mobile. That's the nearest thing to Floatt's actions, without approval, scope or expiry.
+- Fit for Floatt: Orca covers the worktree runner, terminals, review, mobile and remote compute very well. It has no curated library or kits, no per-question ledger, no deterministic scheduler with budgets and verification, no permission policy by default, and no local task store of its own.
 
 **Vibe Kanban** ([repo](https://github.com/BloopAI/vibe-kanban), [shutdown post](https://vibekanban.com/blog/shutdown))
 - Board (To Do → In Progress → Review → Done); each attempt is a worktree with terminal and dev server; 10+ agents supported.
@@ -234,6 +280,31 @@ Scope grew four times while I worked (actions, Huly/GitHub Projects/Drive, the l
   - A *reconciler* (not a poller) links Claude session, worktree, tmux and PR into one card.
   - Hook-based activity detection, BM25 search over session history, push notifications to phone and Watch.
 - **KAGAN**: a keyboard-first kanban TUI.
+
+### 2.2a Conductor, Orca and the Floatt plan, feature by feature
+
+Checked 2026-10-09 (see the two sections above). "Plan" names the Floatt epic, as of the review branch.
+
+| Feature | Conductor | Orca | Floatt plan |
+|---|---|---|---|
+| Workspaces, repo grouping | Worktree per workspace under `~/conductor/workspaces/<repo>/<city>`; project = one repo; sidebar by repo and status sections | Worktree per task with base and start-from refs, parent links; projects group repos; folder workspaces | FL-08 worktrees (one owner, base guard, absolute paths); FL-13 projects |
+| How agents run | Claude Code through the Agent SDK (bundled or system binary); Cursor through its API; others in Big Terminal Mode | Any CLI in a PTY (permission bypass by default); experimental Chat UI through the Agent SDK on the user's `claude` | User's `claude` CLI over stdio stream-json with host permission prompts (FL-03, FL-04) |
+| Session view, terminal | Chat first; terminal, setup and run tabs; editor; browser preview | Terminal first (WebGL, splits); Monaco editor; browser; Chat UI opt-in | Session panel with timeline, tool cards, diff (FL-04); no terminal pane |
+| Diffs and review | Turn-by-turn diffs, inline comments to the agent, AI review | Annotate AI Diff (batched line comments) | Diff tab (FL-04.6); inline comments are in Later |
+| Checks, PR, merge, archive | Checks tab (CI, deployments, todos block merge), PR page, automerge, stacks, archive saves uncommitted work | Inline checks and logs, "Fix broken checks", AI PR text, auto-merge, stacked PRs, archive script | Verifier runs checks itself (FL-09.7); approval sheet commit/push/PR (FL-10.5); cleanup after merge (FL-08.3) |
+| Setup and run scripts | `.conductor/settings.toml` setup, named run scripts, archive; `.worktreeinclude` | `orca.yaml` setup, archive, wait-for-setup; `.worktreeinclude`; shared `node_modules` | Install job and "files to copy" in the project profile (FL-08.2) |
+| Ports and dev servers | `CONDUCTOR_PORT`: a 10-port range per workspace | Port forwarding for SSH worktrees; no pool | Port pools, sticky per task, supervised dev servers, leases (FL-11) |
+| Inbox, questions, gates, approvals | No inbox; "next needs attention" hotkey, unread marks; native AskUserQuestion; opt-in tool approvals | Agents feed, Needs-You dashboard, bell; orchestration `ask` (blocks a worker) and decision gates | One inbox, question ledger with partial answers, exact-text approval sheet (FL-05, FL-10) |
+| Orchestration, dispatch | Parallel workspaces, plan hand-off, forks; agents drive other sessions only in Cloud (API, MCP) | Runs, tasks with deps, dispatch, supervised workers, for an LLM coordinator | Deterministic scheduler with budgets, verification, policy (FL-09); workflows (FL-17) |
+| Automations, schedules | Routines: schedule or GitHub trigger, cloud-only | `automations`: cron/RRULE prompt per agent, precheck probe, local | Workflow triggers: manual and board column (FL-17); schedules not planned |
+| Accounts and auth | User's own logins, Keychain; ChatGPT sign-in | Several Claude/Codex accounts, hot-swap, usage per window | User's own `claude` login; no account switching (decision 6) |
+| Mobile and remote | iOS app (Pro, cloud workspaces); Cloud VMs; SSH into cloud | iOS/Android companion; SSH hosts; Remote Orca Servers; BYO cloud VMs | Not planned (Later: Claude Remote Control) |
+| Artifacts and sharing | Org-only workspace and chat links; shared "loadouts" | `artifacts share`, `skills share` | Not planned |
+| Issue trackers | GitHub issues, Linear (start work; no write-back found); no Jira | GitHub, GitLab, Bitbucket, Azure; Linear and Jira drawers with write | GitHub Projects v2 sync (FL-14) |
+| Library, skills, kits | Uses each agent's config; syncs configs between Claude Code and Codex | Installs its own skills; shares bundles | Curated library, kits, conflict lint, agent proposals (FL-06, FL-07) |
+| Actions | Named run scripts | Quick Commands (saved commands or prompts) | Approved, scoped, expiring actions (FL-12) |
+| Local tasks and notes | `.context` notes folder per workspace | Workspace status and checkpoint comments | Markdown vault with projects, tasks, notes (FL-02, FL-13) |
+| Pricing, licence | Proprietary; free locally, Pro $50/mo | MIT, free | MIT (the repo), personal use |
 
 ### 2.3 Recurring pain points (all tools)
 
@@ -380,7 +451,7 @@ Sources: [huly.io](https://huly.io/), [GitHub docs](https://docs.huly.io/integra
 ## 8. Synthesis
 
 ### 8.1 Patterns that work
-- One worktree per task, with **setup scripts and "files to copy"** (Conductor, Claude Desktop `.worktreeinclude`).
+- One worktree per task, with **setup, run and archive scripts and "files to copy"**. `.worktreeinclude` is now read by Conductor, Orca and Claude Code Desktop alike, so it is the shared convention.
 - Drive Claude Code via **stream-json in and out, plus `--permission-prompt-tool=stdio`**, so permission prompts become UI events (Vibe Kanban). Or use a PTY for any-CLI support (Orca, Crystal, Squad), at the cost of structure.
 - **Expose the app to agents as an MCP server** (Vibe Kanban, Orca CLI), so agents create tasks, workspaces and actions themselves.
 - **Inline diff comments** sent back to the agent as one batch (Claude Desktop, Vibe, Cline).
@@ -417,6 +488,5 @@ Sources: [huly.io](https://huly.io/), [GitHub docs](https://docs.huly.io/integra
 ---
 
 ## 9. Unverified or caveated
-- Conductor's agent-driving mechanism and licence; Zed's editor licence; Huly's licence and the depth of its Projects v2 field sync; Linear's conflict policy; Unito and Exalate conflict policy; Raycast `needsConfirmation`; VS Code automatic-task trust details; Zapier and n8n specifics; Google's 7-day refresh token for unpublished apps; org-only `projects_v2_item` webhooks; Standard Notes backup targets. All are from memory or secondary sources.
-- Orca's 87.8k-star count came from a fetched README summary and looks high.
+- Zed's editor licence; Huly's licence and the depth of its Projects v2 field sync; Linear's conflict policy; Unito and Exalate conflict policy; Raycast `needsConfirmation`; VS Code automatic-task trust details; Zapier and n8n specifics; Google's 7-day refresh token for unpublished apps; org-only `projects_v2_item` webhooks; Standard Notes backup targets. All are from memory or secondary sources.
 - Counts for claude-code-templates, wshobson and SuperClaude come from the projects' own marketing and aren't audited.
