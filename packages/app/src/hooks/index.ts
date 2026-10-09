@@ -13,6 +13,7 @@ export { useBlockNativeContextMenu } from "./use-block-context-menu";
 export { useMediaQuery } from "./use-media-query";
 export { useResizableSheetWidth } from "./use-resizable-sheet-width";
 export { useWindowInsets, useDragRegion } from "./use-window-chrome";
+export { useClaudeSession } from "./use-claude-session";
 export { useListTheme, useSetListTheme, listThemeKey } from "./use-list-theme";
 export {
   useUiStore,

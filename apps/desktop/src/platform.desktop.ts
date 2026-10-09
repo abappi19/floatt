@@ -7,6 +7,8 @@ import {
 } from "@tauri-apps/plugin-notification";
 import { openUrl as tauriOpenUrl } from "@tauri-apps/plugin-opener";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import {
   Menu,
   Submenu,
@@ -18,8 +20,11 @@ import {
 import { Image } from "@tauri-apps/api/image";
 import { LogicalPosition } from "@tauri-apps/api/dpi";
 import type {
+  AgentStartInfo,
+  ClaudeMessage,
   PermissionState,
   Platform,
+  PlatformAgent,
   PlatformMenuItem,
 } from "@floatt/app/platform";
 import { hashToInt32 } from "@floatt/app/utils";
@@ -108,6 +113,16 @@ function normalizePermission(value: string): PermissionState {
   return "default";
 }
 
+const claudeAgent: PlatformAgent = {
+  start: (options) => invoke<AgentStartInfo>("claude_start", { ...options }),
+  send: (message) => invoke("claude_send", { message }),
+  stop: () => invoke("claude_stop"),
+  subscribe(onMessage) {
+    const unlisten = listen<ClaudeMessage>("claude", (event) => onMessage(event.payload));
+    return () => void unlisten.then((stop) => stop());
+  },
+};
+
 export const desktopPlatform: Platform = {
   notifications: {
     async isAvailable() {
@@ -172,4 +187,6 @@ export const desktopPlatform: Platform = {
       await menu.popup(at ? new LogicalPosition(at.x, at.y) : undefined);
     },
   },
+  // FL-03.1 spike: dev builds only until the session view (FL-04) is real.
+  agent: import.meta.env.DEV ? claudeAgent : undefined,
 };
