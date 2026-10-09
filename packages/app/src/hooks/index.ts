@@ -7,7 +7,6 @@ export { useMyDaySuggestions } from "./use-my-day-suggestions";
 export { useImportantTasks } from "./use-important-tasks";
 export { usePlannedTasks } from "./use-planned-tasks";
 export { useOpenTasks } from "./use-open-tasks";
-export { useSearch } from "./use-search";
 export { useReminders } from "./use-reminders";
 export { useKeyboardShortcuts } from "./use-keyboard-shortcuts";
 export { useBlockNativeContextMenu } from "./use-block-context-menu";
