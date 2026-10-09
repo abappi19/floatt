@@ -3,11 +3,15 @@
   "private": true,
   "version": "0.1.0",
   "license": "MIT",
-  "packageManager": "pnpm@9.15.4",
+  "packageManager": "bun@1.4.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "turbo run dev",
     "dev:web": "turbo run dev --filter=@floatt/web",
-    "dev:desktop": "pnpm --filter @floatt/desktop tauri dev",
+    "dev:desktop": "bun run --filter @floatt/desktop tauri dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
@@ -17,6 +21,6 @@
     "@floatt/app": "workspace:*"
   },
   "devDependencies": {
-    "turbo": "^2.9.6"
+    "turbo": "^2.11.7"
   }
 }

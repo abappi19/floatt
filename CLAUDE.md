@@ -12,25 +12,26 @@ Floatt is a local-first task manager (Microsoft To Do–style: groups → lists 
 
 ## Commands
 
-Run from the repo root (pnpm + Turborepo):
+Run from the repo root (Bun + Turborepo):
 
 ```bash
-pnpm dev            # run all dev servers via turbo
-pnpm dev:web        # web app only (Next.js, @floatt/web)
-pnpm dev:desktop    # desktop app (pnpm --filter @floatt/desktop tauri dev)
-pnpm build          # build everything (next build → static export to out/ for web; tsc --noEmit && vite build for desktop)
-pnpm test           # vitest run, all packages
-pnpm check-types    # tsc --noEmit across packages
+bun install             # install dependencies (Bun workspaces, bun.lock)
+bun run dev             # run all dev servers via turbo
+bun run dev:web         # web app only (Next.js, @floatt/web)
+bun run dev:desktop     # desktop app (bun run --filter @floatt/desktop tauri dev)
+bun run build           # build everything (next build → static export to out/ for web; tsc --noEmit && vite build for desktop)
+bun run test            # vitest run, all packages
+bun run check-types     # tsc --noEmit across packages
 
 # Single package / single test
-pnpm --filter @floatt/app test                       # tests in the shared package
-pnpm --filter @floatt/app exec vitest run src/utils/repeat.util.test.ts
-pnpm --filter @floatt/app exec vitest                 # watch mode
+bun run --filter @floatt/app test                                 # tests in the shared package
+bun run --filter @floatt/app test src/utils/repeat.util.test.ts   # one test file
+bun run --cwd packages/app vitest                                 # watch mode
 ```
 
 Notes:
-- `pnpm lint` is wired through Turbo but **no linter is currently configured** (no ESLint/Biome config exists), so it is effectively a no-op.
-- The desktop `tauri dev` command auto-starts the Vite dev server (`beforeDevCommand: pnpm dev`, devUrl `http://localhost:1420`). Desktop dev requires a Rust toolchain (`apps/desktop/src-tauri`).
+- `bun run lint` is wired through Turbo but **no linter is currently configured** (no ESLint/Biome config exists), so it is effectively a no-op.
+- The desktop `tauri dev` command auto-starts the Vite dev server (`beforeDevCommand: bun run dev`, devUrl `http://localhost:1420`). Desktop dev requires a Rust toolchain (`apps/desktop/src-tauri`).
 
 ## Architecture
 
