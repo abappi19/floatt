@@ -1,3 +1,5 @@
+import type { ClaudeInput, ClaudeMessage } from "../types/claude-stream.type";
+
 export type PermissionState = "granted" | "denied" | "default";
 
 export interface PlatformNotifications {
@@ -63,9 +65,35 @@ export interface PlatformMenu {
   popup(items: PlatformMenuItem[], at?: { x: number; y: number }): Promise<void>;
 }
 
+export interface AgentStartOptions {
+  cwd: string;
+  /** Session id to continue with `--resume`. */
+  resume?: string;
+  /** User-set path to `claude`; otherwise the host looks in the usual places. */
+  claudePath?: string;
+}
+
+export interface AgentStartInfo {
+  claudePath: string;
+  /** A user-set path, the user's shell PATH, or a known install location. */
+  foundBy: "user" | "shell" | "known-location";
+}
+
+/** Drives the user's own `claude` CLI over stream-json stdio. */
+export interface PlatformAgent {
+  /** Starts a `claude` process, replacing any running one. */
+  start(options: AgentStartOptions): Promise<AgentStartInfo>;
+  send(input: ClaudeInput): Promise<void>;
+  stop(): Promise<void>;
+  /** Returns an unsubscribe function. */
+  subscribe(onMessage: (message: ClaudeMessage) => void): () => void;
+}
+
 export interface Platform {
   notifications: PlatformNotifications;
   opener: PlatformOpener;
   window: PlatformWindow;
   menu: PlatformMenu;
+  /** Claude sessions. Desktop only. */
+  agent?: PlatformAgent;
 }

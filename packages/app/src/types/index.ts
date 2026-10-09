@@ -4,3 +4,8 @@ export type { Task, Bit } from "./task.type";
 export type { Subtask } from "./subtask.type";
 export type { Repeat, RepeatKind } from "./repeat.type";
 export type { SmartListId, ListSelection } from "./smart-list.type";
+export type {
+  ClaudeCanUseToolRequest,
+  ClaudeInput,
+  ClaudeMessage,
+} from "./claude-stream.type";
