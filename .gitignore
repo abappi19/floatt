@@ -35,6 +35,3 @@ next-env.d.ts
 *.njsproj
 *.sln
 *.sw?
-
-# kitten-bot drafts
-_kitten-bot/
