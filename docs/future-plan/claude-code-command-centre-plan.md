@@ -27,7 +27,7 @@ Floatt is a personal command centre on top of Claude Code. It holds a large, cur
 | 6 | Auth and licensing | Personal-only for now, with whatever `claude` login the user's terminal already uses; Floatt never logs in or touches `~/.claude`, and keeps tool approvals in the app. A public build (API key, signing) waits for Anthropic's answer |
 | 7 | GitHub | One budgeted client in agentd. The `gh` token in v1, the device flow later. Polling, no webhooks |
 | 8 | "VS Code" | Control the user's VS Code and embed CodeMirror 6 |
-| 9 | Web app | Keep a limited "Floatt Tasks" build with no agents |
+| 9 | Web app | Freeze the web build on its current Dexie data: no vault and no agents on web. Desktop is where the vault and Claude live |
 | 10 | Orchestrator brain | Deterministic code, one instance for all projects. LLMs only as workers, advisors and an optional master persona |
 | 11 | Approvals | Anything leaving the machine needs one exact-text approval bound to a content hash |
 | 12 | Board vs run state | Task status is content in the file. Run state is a runtime overlay |
@@ -80,7 +80,7 @@ Floatt is a personal command centre on top of Claude Code. It holds a large, cur
 | SQLite (agentd, in app-data) | Runs, sessions, events, jobs, decisions, actions, leases, resources, GitHub cache | **Yes**, for runtime state |
 | Dexie `floatt-index` (webview) | An index of the vault for the UI | No. Rebuilt on any schema change |
 
-- Why: agents, git and backup can read files, and runtime churn (heartbeats, logs, ports) stays out of them. Today's `queries/` and `hooks/` keep working over Dexie, and the web build shares the code.
+- Why: agents, git and backup can read files, and runtime churn (heartbeats, logs, ports) stays out of them. Today's `queries/` and `hooks/` keep working over Dexie, and the frozen web build keeps reading and writing the same tables directly.
 - The agent runtime reads only the vault fields it acts on (status, branch, kit, holds) with a small Rust reader, and caches them. The full parser stays in `@floatt/vault` for the UI.
 - The Rust core is the only writer of vault files: the UI and the agent runtime both go through it, and agents change tasks through MCP tools. Each write is atomic with an expected content hash; on a mismatch it re-reads and re-applies the field patch once.
 - Reconciled: C kept run records as vault files. **Keep live run state in SQLite**, and write one summary file into the vault when a run ends.
@@ -127,10 +127,11 @@ Floatt is a personal command centre on top of Claude Code. It holds a large, cur
 
 ### 9. The web app
 
-**Key decision:** keep a limited "Floatt Tasks" build.
-- It runs the same vault code over an IndexedDB `VaultFs`.
-- It has no agents, sync or backup, because `Platform.agent` is absent there.
-- Revisit dropping it if it costs more than about a day per quarter.
+**Key decision:** freeze the web build on its current Dexie data. Desktop is where the vault and Claude live.
+- Web keeps today's Dexie database and today's task features. It gets no vault, no migration, no agents, no sync and no backup.
+- In FL-02 the services write through the vault only when `Platform.vault` exists (desktop) and keep writing Dexie as today when it doesn't (web). Queries and hooks stay shared, because the desktop index keeps today's table shapes.
+- New features (projects and boards, the library, agents) ship as desktop modules through the `modules` prop, so the web bundle never loads them.
+- Revisit dropping the web build if keeping it costs more than about a day per quarter.
 
 ### 10. The orchestrator's brain
 
@@ -725,7 +726,7 @@ The full breakdown, with acceptance criteria and sub-tasks, is in [`claude-code-
 | M5 Boards, workflows and GitHub | FL-13 Projects, boards and Huly-style tasks, FL-14 GitHub Projects v2 sync (one-way first), FL-17 Workflows |
 | M6 Backup and learning | FL-15 Backup and restore, FL-16 Learning loop |
 
-The review decisions of 2026-10-09 bring the serial estimate from about 36-52 weeks to about 30-41. The epics file lists them and keeps everything cut in its Later section.
+The review decisions of 2026-10-09 bring the serial estimate from about 36-52 weeks to about 30-40. The epics file lists them and keeps everything cut in its Later section.
 
 ## Open questions for the user
 
@@ -737,6 +738,7 @@ The review decisions of 2026-10-09 bring the serial estimate from about 36-52 we
 6. **GitHub Project status writes without approval** (your own boards only; comments and PR text still need approval). *Recommend:* yes, with the circuit breaker.
 7. **A "master" chat panel in v1?** *Recommend:* no. Build the command centre, inbox and palette first. Decide at the end of M4; if you still miss it, the read-only master is an optional sub-task in FL-16.
 8. **Git for the vault.** *Recommend:* `library/` is always a git repo. Auto-commit for the rest of `~/Floatt/` is opt-in later.
+9. **The web build.** *Decided (2026-10-09): frozen on its current Dexie data; no vault and no agents on web.*
 
 ## Sources
 

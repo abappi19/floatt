@@ -12,14 +12,14 @@ How to use this file:
 | Milestone | Epics | What you have at the end | Rough weeks |
 |---|---|---|---|
 | M0 Claude inside Floatt (v0) | FL-01, then parts of FL-03, FL-04 and FL-05 (listed below) | Claude runs inside Floatt: the user's `claude` CLI driven over stdio, an in-app session panel with streaming, approvals, stop and resume, and agents that read and write Floatt tasks over MCP. No vault and no sidecar | 2-3 |
-| M1 Foundation | FL-02 | The same app, with data as markdown in `~/Floatt/` | 3-4 |
+| M1 Foundation | FL-02 | The same desktop app, with data as markdown in `~/Floatt/`. The web build stays on its current Dexie data | 3 |
 | M2 Claude Code wrapper you can use daily | FL-03, FL-04, FL-05, and FL-10.3 | Run, watch and steer Claude sessions from Floatt, with one approval surface and the question ledger, and see (read-only) the sessions started elsewhere, Orca's included | 5-7 |
 | M3 Library and kits | FL-06, FL-07 | One library, a kit per project, conflict lint and context cost, and reusable things agents write and the user approves | 4-5 |
 | M4 Orchestrator | FL-08 to FL-12 | The open-source workspace as an app: queue issues, worktrees, verified reports, one inbox, approvals, dev servers and device-switch buttons | 10-13 |
 | M5 Boards, workflows, Huly features, GitHub Projects | FL-13, FL-14, FL-17 | Boards with Huly fields and the open-source workspace imported, status pushed to GitHub Projects; workflows you or an agent build, with every run visible | 5-7 |
 | M6 Backup, learning loop, polish | FL-15, FL-16 | Encrypted folder backup with tested restore, and proposals from repeated asks | 1-2 |
 
-The serial total is about 30-41 weeks (36-52 before the review decisions of 2026-10-09). Parallel tracks shorten it, because milestones mark an order of finishing, not a strict queue:
+The serial total is about 30-40 weeks (36-52 before the review decisions of 2026-10-09). Parallel tracks shorten it, because milestones mark an order of finishing, not a strict queue:
 - M0 comes first, by the user's call: Claude running inside Floatt is worth more early than markdown data. It takes about 2-3 weeks (FL-01.1-01.3, FL-01.6 and the FL-03.1 spike are already done), where the first draft needed 9-13 (M1 then M2) before the first session ran in the app. Driving the CLI from Rust instead of the Agent SDK in a sidecar removes the packaging spike and the extra process.
 - FL-02 starts once M0's agent runtime is in, and the rest of FL-03 and FL-04 carries on beside it.
 - FL-06 (library store) needs only the vault, the agent runtime and the MCP server, so it starts during M2.
@@ -45,6 +45,7 @@ Later additions, from the user:
 - The plan review decisions (2026-10-09), applied across the epics:
   - personal-only for now; a public release (API key, signing, auto-update) is in Later
   - one device in v1, with the vault in a visible `~/Floatt/`
+  - the web build is frozen on its current Dexie data: no vault and no agents on web
   - the inbox model (FL-10.3) moves into M2, the FL-04 → FL-05 edge is dropped, and FL-13's board no longer waits for the orchestrator
   - FL-09 is cut to what one person with four agents needs, and policy uses Claude Code's own deny rules first
   - the library, kits, resources, GitHub sync, backup, actions and learning loop are trimmed to their v1 core, with the rest in Later
@@ -174,7 +175,7 @@ Make the codebase safe and modular enough for the command-centre work, with no v
 
 ### FL-02 Markdown vault at `~/Floatt`
 
-**Milestone:** M1 · **Size:** XL, 3-4 weeks (one device, so no multi-device bookkeeping) · **Depends on:** FL-01
+**Milestone:** M1 · **Size:** L, about 3 weeks (one device, and no vault on web) · **Depends on:** FL-01
 
 **Problem**
 
@@ -185,13 +186,13 @@ All tasks live in IndexedDB inside the webview. Agents, git, the agent runtime a
 Tasks and projects live as markdown files with YAML frontmatter in `~/Floatt/`. Dexie becomes an index that can be rebuilt, and existing data migrates safely. This is the first shippable step: the same app, with markdown data.
 
 **In scope**
-- A `@floatt/vault` package (schemas, serialise, reconcile, in-memory `VaultFs`, migration) that works in the webview and in Node
+- A `@floatt/vault` package (schemas, serialise, reconcile, in-memory `VaultFs`, migration) that works in the webview and in tests
 - Rust vault commands: a path jail, atomic writes with an expected hash, a watcher
 - A `floatt-index` Dexie database, reconciled on start and on every change
 - Task, subtask, group and subgroup services writing through the vault
 - A midpoint reorder, so a move writes one file
 - A one-time migration from Dexie v1, with a JSON dump kept in `~/Floatt/.migrations/`
-- A web `VaultFs` over IndexedDB
+- The web build stays on its current Dexie data: the services write through the vault only when `Platform.vault` exists, and keep writing Dexie on web. Web gets no vault and no migration
 - A vault location setting (default `~/Floatt/`), with `device.json` in the Tauri app-data dir
 - A problems list for invalid files and sync-tool conflict copies
 
@@ -208,7 +209,7 @@ Tasks and projects live as markdown files with YAML frontmatter in `~/Floatt/`. 
 - Deleting the index and restarting rebuilds it from the files
 - Path jail tests reject `..`, absolute paths and symlink escapes
 - The vault can be moved in Settings, and `device.json` never lives inside it
-- The web build works on its IndexedDB `VaultFs`
+- The web build still works on its current Dexie data, with no vault and no migration
 - The time for a cold index of 10k task files is measured and written down
 
 **Sub-tasks**
@@ -220,7 +221,7 @@ Tasks and projects live as markdown files with YAML frontmatter in `~/Floatt/`. 
 - [ ] FL-02.6 Move the task, subtask, group and subgroup services to field-patch writes
 - [ ] FL-02.7 Midpoint reorder in `reorder.service.ts`
 - [ ] FL-02.8 Migration from Dexie v1 with a dump, plus the first-launch flow
-- [ ] FL-02.9 Web `VaultFs` over a Dexie `files` table
+- FL-02.9 (a web `VaultFs`) dropped: the web build stays on its current Dexie data
 - [ ] FL-02.10 Settings: show, reveal and move the vault location
 
 **Risks**
@@ -277,7 +278,7 @@ The agent runtime ("agentd") is a module in the Rust core. It finds and spawns `
 - A `claude` newer than the tested version shows a warning, and the session still starts
 
 **Sub-tasks**
-- [x] FL-03.1 Spike: drive `claude -p` stream-json from Rust with host permission prompts, interrupt, `--resume`, `--strict-mcp-config` and `--setting-sources`. Write down the protocol messages, what loads, and the version. Done 2026-10-09 (agent5): go. Drive `claude` directly, with Floatt's tools on an HTTP loopback MCP endpoint. The spike's PR is dev-only and is the base for M0
+- [x] FL-03.1 Spike: drive `claude -p` stream-json from Rust with host permission prompts, interrupt, `--resume`, `--strict-mcp-config` and `--setting-sources`. Write down the protocol messages, what loads, and the version. Done 2026-10-09 (agent5): go. Drive `claude` directly, with Floatt's tools on an HTTP loopback MCP endpoint. The spike's PR (#10, open) is dev-only and is the base for M0
 - [ ] FL-03.2 Rust process supervisor: process groups, kill on quit, kept alive from the tray
 - [ ] FL-03.3 Loopback server with token auth for `/hook` and `/mcp`
 - [ ] FL-03.4 SQLite store, migration runner and schema v1
@@ -1184,3 +1185,4 @@ The next two weeks finish M0. Run these in parallel, one agent per worktree, one
 - A clustering digest for repeated asks, and a metrics page (dollars per merged PR, verify-fail rate per kit)
 - CPU and RAM pools and priority with aging for the scheduler, if four agents stop being enough
 - Scheduled workflow triggers with a precheck command (as in Orca's automations)
+- The vault on the web build (a `VaultFs` over IndexedDB, or the File System Access API), only if the frozen web build turns out to be worth growing
