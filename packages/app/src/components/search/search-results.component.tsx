@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
 import { SearchX } from "lucide-react";
 import Fuse from "fuse.js";
-import { db } from "@/services/db.service";
 import {
+  useAllSubtasks,
+  useAllTasksIncludingCompleted,
   useSearchQuery,
   useSelectList,
   useSelectTask,
@@ -32,8 +32,8 @@ export function SearchResults() {
   const selectTask = useSelectTask();
   const insets = useWindowInsets();
 
-  const tasks = useLiveQuery(() => db.tasks.toArray(), [], []);
-  const subtasks = useLiveQuery(() => db.subtasks.toArray(), [], []);
+  const tasks = useAllTasksIncludingCompleted();
+  const subtasks = useAllSubtasks();
 
   const taskFuse = useMemo(
     () =>

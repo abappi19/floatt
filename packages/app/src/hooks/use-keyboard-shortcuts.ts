@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useCommandStore, useUiStore } from "@/stores";
+import { getTaskById } from "@/queries";
 import { setTaskCompleted } from "@/services";
-import { db } from "@/services/db.service";
 
 function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
@@ -50,7 +50,7 @@ export function useKeyboardShortcuts(): void {
         const id = useUiStore.getState().selectedTaskId;
         if (!id) return;
         e.preventDefault();
-        void db.tasks.get(id).then((t) => {
+        void getTaskById(id).then((t) => {
           if (!t) return;
           void setTaskCompleted(id, t.isCompleted === 0);
         });
