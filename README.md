@@ -54,7 +54,7 @@ Floatt is built as a workspace of focused modules sharing one shell, design syst
 - **Zustand** for ephemeral UI state
 - **Tailwind CSS v4** + **radix-ui** primitives (shadcn-style)
 - **@dnd-kit** (drag & drop), **fuse.js** (search), **date-fns** (dates)
-- **pnpm** + **Turborepo** monorepo
+- **Bun** + **Turborepo** monorepo
 
 ## Monorepo layout
 
@@ -72,11 +72,11 @@ Each new module ships as a **sibling package** (`packages/notes`, `packages/boar
 ## Getting started
 
 ```bash
-pnpm install        # install dependencies
+bun install             # install dependencies
 
-pnpm dev            # run all dev servers via Turborepo
-pnpm dev:web        # web app only (Next.js)
-pnpm dev:desktop    # desktop app (Tauri — requires a Rust toolchain)
+bun run dev             # run all dev servers via Turborepo
+bun run dev:web         # web app only (Next.js)
+bun run dev:desktop     # desktop app (Tauri — requires a Rust toolchain)
 ```
 
 > Desktop development requires a [Rust toolchain](https://www.rust-lang.org/tools/install) for `apps/desktop/src-tauri`. `tauri dev` auto-starts the Vite dev server on `http://localhost:1420`.
@@ -84,14 +84,14 @@ pnpm dev:desktop    # desktop app (Tauri — requires a Rust toolchain)
 ## Scripts
 
 ```bash
-pnpm build          # build everything (next build for web, vite build for desktop)
-pnpm test           # run all tests (vitest)
-pnpm check-types    # tsc --noEmit across packages
+bun run build           # build everything (next build for web, vite build for desktop)
+bun run test            # run all tests (vitest)
+bun run check-types     # tsc --noEmit across packages
 
 # single package / single test
-pnpm --filter @floatt/app test
-pnpm --filter @floatt/app exec vitest run src/utils/repeat.test.ts
-pnpm --filter @floatt/app exec vitest          # watch mode
+bun run --filter @floatt/app test
+bun run --filter @floatt/app test src/utils/repeat.util.test.ts
+bun run --cwd packages/app vitest               # watch mode
 ```
 
 ## Architecture

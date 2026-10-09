@@ -327,7 +327,7 @@ type Report = {
 ```yaml
 expo:   { format: "node_modules/.bin/oxfmt --write {changed}", typecheck: "../../node_modules/.bin/tsc -p tsconfig.json --noEmit",
           lint: "../../node_modules/.bin/oxlint --config oxlint.config.mjs {changed}", test: "./node_modules/.bin/jest {related}", cwd: "packages/{pkg}" }
-floatt: { typecheck: "pnpm check-types", test: "pnpm test" }                       # lint is a no-op upstream
+floatt: { typecheck: "bun run check-types", test: "bun run test" }                 # lint is a no-op upstream
 react-native-firebase: { allowlist: "okf-bundle/testing/agent-command-policy.md" }  # agent Bash restricted to it
 ```
 

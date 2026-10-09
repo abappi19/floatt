@@ -106,7 +106,7 @@ Glyphs used in the wireframes: `●` working, `◆` needs you, `◎` in review, 
 │ ◆ agent7  floatt#96 tanstack tab  pick: keep or drop devtools   6m  [Y] │
 │ ◆ agent2  rnkc#1042 inset         permission: run adb shell     1m  [→] │
 │ WORKING                                                                 │
-│ ● agent3  floatt#95 query cache   running pnpm vitest  1m10s  ↻4s  $1.2 │
+│ ● agent3  floatt#95 query cache   running bun vitest   1m10s  ↻4s  $1.2 │
 │ ● agent5  expo#51210 router       editing app/_layout.tsx      ↻2s  $0.8 │
 │ ● agent1  rn-svg#2533 mask        running jest · 7m02s (usual 1m30s) ⚠  │
 │ ● agent6  rnfb#8471 auth          subagent: reviewer (2/3)     ↻9s  $2.1 │
@@ -191,7 +191,7 @@ Agent card, in detail:
 ```
 ┌────────────────────────────────────┐
 │ #96 TanStack Query tab      ⋯      │ title, menu (⌘K scoped to the card)
-│ ● agent3 · running pnpm vitest     │ state glyph, owner, live step
+│ ● agent3 · running bun vitest      │ state glyph, owner, live step
 │   1m10s (usual 1m30s)   ↻ 4s       │ step timer vs history, heartbeat
 │ ▮▮▮▮▮▯▯ steps 5/7                  │ agent's TodoWrite steps = Floatt steps
 │ $1.20 / $5.00  ▮▮▯▯▯▯▯▯             │ budget (cost or tokens, per project)
@@ -217,7 +217,7 @@ Agent card, in detail:
 │ ✓ 3 Implement tab    │ vitest now.                 │ ▸ src/hooks/use-query.ts  +40 −12│
 │ ● 4 Test   1m10s     │                             │ ▸ src/tabs/index.test.ts   +8 −6 │
 │ ○ 5 Screenshot       │ ┌ Tool: Bash ─────────────┐ │                                  │
-│ ○ 6 Draft PR         │ │ pnpm vitest run  1m10s  │ │ Checks (local)                   │
+│ ○ 6 Draft PR         │ │ bun vitest run   1m10s  │ │ Checks (local)                   │
 │ ○ 7 Hand to you      │ │ ▸ 41 passed · 0 failed… │ │ ✓ tsc   ✓ vitest 41/41  ● lint   │
 │ TOOLS (live)         │ └─────────────────────────┘ │ Checks (CI, as of 2m)            │
 │ 10:41 Edit ×3        │                             │ — not pushed yet                 │
@@ -512,7 +512,7 @@ Use the existing theme tokens and `ThemeToggle`. Check every status token agains
 
 ### Accessibility
 
-- Every glyph has a text equivalent. A row reads as "agent3, working, running pnpm vitest, 1 minute 10 seconds, last activity 4 seconds ago".
+- Every glyph has a text equivalent. A row reads as "agent3, working, running bun vitest, 1 minute 10 seconds, last activity 4 seconds ago".
 - The inbox count uses `aria-live="polite"`. Only interrupt-tier items use `assertive`, and those are batched like the OS notifications.
 - Full keyboard paths for every flow in section 4. Focus returns to the originating row when a sheet closes. Shortcuts are single letters only when no input is focused (the same `isTypingTarget` guard as today).
 - Hit targets are at least 24px, even in compact density, because icon buttons pad out to the row height.
