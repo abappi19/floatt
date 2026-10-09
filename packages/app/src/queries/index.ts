@@ -10,7 +10,7 @@ export {
   getAllTasks,
   getTasksWithReminders,
 } from "./task.query";
-export { getSubtasksByTask } from "./subtask.query";
+export { getSubtasksByTask, getAllSubtasks } from "./subtask.query";
 export {
   getMyDayTasks,
   getImportantTasks,

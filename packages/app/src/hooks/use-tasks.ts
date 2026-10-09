@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { getTaskById, getTasksBySubgroup } from "@/queries";
+import { getAllTasks, getTaskById, getTasksBySubgroup } from "@/queries";
 import type { Task } from "@/types";
 
 const EMPTY: Task[] = [];
@@ -18,4 +18,8 @@ export function useTask(id: string | null | undefined): Task | undefined {
     [id],
     undefined,
   );
+}
+
+export function useAllTasksIncludingCompleted(): Task[] {
+  return useLiveQuery(() => getAllTasks(), [], EMPTY);
 }

@@ -1,7 +1,7 @@
 export { useGroups } from "./use-groups";
 export { useSubgroups, useSubgroupsByGroup } from "./use-subgroups";
-export { useTasks, useTask } from "./use-tasks";
-export { useSubtasks } from "./use-subtasks";
+export { useTasks, useTask, useAllTasksIncludingCompleted } from "./use-tasks";
+export { useSubtasks, useAllSubtasks } from "./use-subtasks";
 export { useMyDay } from "./use-my-day";
 export { useMyDaySuggestions } from "./use-my-day-suggestions";
 export { useImportantTasks } from "./use-important-tasks";

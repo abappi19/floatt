@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/utils/zod.util";
 
 export const repeatKindSchema = z.enum([
   "daily",

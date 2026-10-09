@@ -7,3 +7,7 @@ export function getSubtasksByTask(taskId: string): Promise<Subtask[]> {
     .between([taskId, -Infinity], [taskId, Infinity])
     .toArray();
 }
+
+export function getAllSubtasks(): Promise<Subtask[]> {
+  return db.subtasks.toArray();
+}
