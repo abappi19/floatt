@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "preview": "npx serve out",
-    "check-types": "tsc --noEmit"
+    "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@floatt/app": "workspace:*",
