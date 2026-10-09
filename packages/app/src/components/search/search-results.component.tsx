@@ -3,7 +3,7 @@ import { SearchX } from "lucide-react";
 import Fuse from "fuse.js";
 import {
   useAllSubtasks,
-  useAllTasksIncludingCompleted,
+  useAllTasks,
   useSearchQuery,
   useSelectList,
   useSelectTask,
@@ -32,7 +32,7 @@ export function SearchResults() {
   const selectTask = useSelectTask();
   const insets = useWindowInsets();
 
-  const tasks = useAllTasksIncludingCompleted();
+  const tasks = useAllTasks();
   const subtasks = useAllSubtasks();
 
   const taskFuse = useMemo(

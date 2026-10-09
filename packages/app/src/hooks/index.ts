@@ -1,13 +1,12 @@
 export { useGroups } from "./use-groups";
 export { useSubgroups, useSubgroupsByGroup } from "./use-subgroups";
-export { useTasks, useTask, useAllTasksIncludingCompleted } from "./use-tasks";
+export { useTasks, useTask, useAllTasks } from "./use-tasks";
 export { useSubtasks, useAllSubtasks } from "./use-subtasks";
 export { useMyDay } from "./use-my-day";
 export { useMyDaySuggestions } from "./use-my-day-suggestions";
 export { useImportantTasks } from "./use-important-tasks";
 export { usePlannedTasks } from "./use-planned-tasks";
-export { useAllTasks } from "./use-all-tasks";
-export { useSearch } from "./use-search";
+export { useOpenTasks } from "./use-open-tasks";
 export { useReminders } from "./use-reminders";
 export { useKeyboardShortcuts } from "./use-keyboard-shortcuts";
 export { useBlockNativeContextMenu } from "./use-block-context-menu";

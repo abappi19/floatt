@@ -23,10 +23,10 @@ import {
 import { SMART_LISTS, themeStyle } from "@/consts";
 import type { ListSelection, Task } from "@/types";
 import {
-  useAllTasks,
   useGroups,
   useImportantTasks,
   useMyDay,
+  useOpenTasks,
   usePlannedTasks,
   useListTheme,
   useSelectList,
@@ -160,9 +160,9 @@ function useSmartListBody(
 ): ListBody {
   const myDay = useMyDay();
   const important = useImportantTasks();
-  const all = useAllTasks();
+  const open = useOpenTasks();
   const source =
-    smartId === "my-day" ? myDay : smartId === "important" ? important : all;
+    smartId === "my-day" ? myDay : smartId === "important" ? important : open;
   const sorted = useMemo(() => sortTasks(source, sort), [source, sort]);
   return {
     pending: <TaskFlatList tasks={sorted} />,
